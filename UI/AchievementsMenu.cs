@@ -208,19 +208,21 @@ namespace Yurand.Timberborn.Achievements.UI
                     }).AddComponent(bar => {
                         bar.SetStyle(style => {
                             style.backgroundColor = new StyleColor(new Color(0, 0.3f, 0, 1));
-                            style.width = new Length(current_global / max * 100f, Percent);
+                            style.width = new Length(Mathf.Min(current_global, max) / max * 100f, Percent);
                             style.height = new Length(100, Percent);
                         });
                     });
 
                     if (current_local.HasValue) {
-                    bar_wrapper.AddComponent(bar => {
-                        bar.SetStyle(style => {
-                            style.backgroundColor = new StyleColor(new Color(0, 0.5f, 0, 1));
-                            style.width = new Length(current_local.Value / max * 100f, Percent);
-                            style.height = new Length(100, Percent);
+                        bar_wrapper.AddComponent(bar => {
+                            bar.SetStyle(style => {
+                                style.backgroundColor = new StyleColor(new Color(0, 0.5f, 0, 1));
+                                style.position = Position.Absolute;
+                                style.top = 0; style.left = 0;
+                                style.width = new Length(Mathf.Min(current_local.Value, max) / max * 100f, Percent);
+                                style.height = new Length(100, Percent);
+                            });
                         });
-                    });
                     }
                 })
                 .AddComponent(label_wrapper => {

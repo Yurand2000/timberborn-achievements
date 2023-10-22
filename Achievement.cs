@@ -7,15 +7,20 @@ using Timberborn.Persistence;
 
 namespace Yurand.Timberborn.Achievements
 {
-    public struct Achievement {
+    public class Achievement {
         public AchievementDefinition definition;
         public bool completed;
         public float? current_value;
+        public Achievement(AchievementDefinition definition) {
+            this.definition = definition;
+            this.completed = false;
+            this.current_value = definition.statusDefinition.HasValue ? 0 : null;
+        }
 
         public Achievement(IDictionary<string, AchievementDefinition> definitions, SerializableAchievement achievement) {
-            definition = definitions[achievement.achievementId];
-            completed = achievement.completed;
-            current_value = definition.statusDefinition.HasValue ? achievement.current_value : null;
+            this.definition = definitions[achievement.achievementId];
+            this.completed = achievement.completed;
+            this.current_value = definition.statusDefinition.HasValue ? achievement.current_value : null;
         }
 
         public SerializableAchievement ToSerializable() {

@@ -2,14 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization.Json;
-using System.Transactions;
 using TimberApi.ConsoleSystem;
-using Timberborn.Common;
 using Timberborn.Persistence;
 using Timberborn.SingletonSystem;
-using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.AI;
 
 namespace Yurand.Timberborn.Achievements
 {
@@ -29,8 +25,8 @@ namespace Yurand.Timberborn.Achievements
 
         public void Load() {
             LoadDefinitions();
-            LoadGlobal();            
-            
+            LoadGlobal();
+
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Correctly loaded achievements manager.");
                 console.LogInfo($"Loaded {achievementDefinitions.Count} achievements");
@@ -58,17 +54,7 @@ namespace Yurand.Timberborn.Achievements
                 }
             } catch (System.IO.FileNotFoundException) { }
 
-            foreach (var key in achievementDefinitions.Keys.Except(global_achievements.Keys)) {
-                var definition = achievementDefinitions[key];
-
-                global_achievements.Add(
-                    key, new Achievement {
-                        definition = definition,
-                        completed = false,
-                        current_value = definition.statusDefinition.HasValue ? 0 : null,
-                    }
-                );
-            }
+            AddMissingGlobalAchievements();
         }
 
         public void Unload() {
@@ -78,7 +64,6 @@ namespace Yurand.Timberborn.Achievements
         public void SaveGlobal() {
             try {
                 var xml = XmlHelper.ToString(SerializeAchievements(global_achievements));
-                console.LogInfo($"acks: {xml}");
                 System.IO.File.WriteAllText(PluginEntryPoint.directory + "/" + achievementFile, xml);
 
                 if (PluginEntryPoint.debugLogging) {
@@ -109,9 +94,76 @@ namespace Yurand.Timberborn.Achievements
                 return null;
         }
 
+        public bool TryUpdateLocalAchievement(string achievementId, bool completed) {
+            if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+
+            local_achievements[achievementId].completed = completed;
+            UpdateGlobalAchievementFromLocal(achievementId);
+            return true;
+        }
+
+        public bool TryUpdateLocalAchievement(string achievementId, float completition) {
+            if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+            var definition = achievementDefinitions[achievementId];
+
+            if (completition >= local_achievements[achievementId].current_value)
+                local_achievements[achievementId].current_value = completition;
+
+            var max_value = definition.statusDefinition?.max_value ?? float.MaxValue;
+            if (completition >= max_value)
+                local_achievements[achievementId].current_value = max_value;
+                local_achievements[achievementId].completed = true;
+
+            UpdateGlobalAchievementFromLocal(achievementId);
+            return true;
+        }
+
+        public bool TryForceUpdateLocalAchievement(string achievementId, bool completed, float completition, bool update_global) {
+            if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+            var definition = achievementDefinitions[achievementId];
+
+            local_achievements[achievementId].completed = completed;
+            local_achievements[achievementId].current_value = completition;
+             var max_value = definition.statusDefinition?.max_value ?? float.MaxValue;
+            if (completition >= max_value)
+                local_achievements[achievementId].current_value = max_value;
+
+            if(update_global) UpdateGlobalAchievementFromLocal(achievementId);
+            return true;
+        }
+
+        private void UpdateGlobalAchievementFromLocal(string achievementId) {
+            global_achievements[achievementId].completed = local_achievements[achievementId].completed;
+            global_achievements[achievementId].current_value = local_achievements[achievementId].current_value;
+        }
+
+        public void ResetLocalAchievements() {
+            local_achievements.Clear();
+            AddMissingLocalAchievements();
+        }
+
+        public void ResetGlobalAchievements() {
+            local_achievements.Clear();
+            AddMissingGlobalAchievements();
+        }
+
+        private void AddMissingGlobalAchievements() {
+            foreach (var key in achievementDefinitions.Keys.Except(global_achievements.Keys)) {
+                global_achievements.Add(key, new Achievement(achievementDefinitions[key]));
+            }
+        }
+
+        private void AddMissingLocalAchievements() {
+            foreach (var key in achievementDefinitions.Keys.Except(local_achievements.Keys)) {
+                local_achievements.Add(key, new Achievement(achievementDefinitions[key]));
+            }
+        }
+
         public void SetInGame(bool isInGame, Dictionary<string, Achievement> local_achievements) {
             this.isInGame = isInGame;
             this.local_achievements = local_achievements;
+            if (this.local_achievements is not null)
+                AddMissingLocalAchievements();
 
             if (PluginEntryPoint.debugLogging) {
                 if (this.isInGame)
@@ -143,7 +195,7 @@ namespace Yurand.Timberborn.Achievements
             };
         }
     }
-    
+
     public class AchievementManagerInGame : ILoadableSingleton, ISaveableSingleton, IUnloadableSingleton
     {
         private AchievementManager manager;
@@ -157,20 +209,26 @@ namespace Yurand.Timberborn.Achievements
         }
 
         public void Load() {
-            var loader = singletonLoader.GetSingleton(singletonKey);
-            var local_acks_data = loader.Get(localAchievementsKey, new SerializableAchievementsSerializer());
-            var definitions = manager.GetAchievementDefinitions();
-            foreach(var local_ack in local_acks_data.achievements) {
-                local_achievements.Add(
-                    local_ack.achievementId,
-                    new Achievement(definitions, local_ack)
-                );
-            }
-
+            TryLoadLocalAchievements();
             manager.SetInGame(true, local_achievements);
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Correctly loaded achievements manager (ingame).");
+            }
+        }
+
+        private void TryLoadLocalAchievements() {
+            var definitions = manager.GetAchievementDefinitions();
+
+            if (singletonLoader.HasSingleton(singletonKey)) {
+                var loader = singletonLoader.GetSingleton(singletonKey);
+                var local_acks_data = loader.Get(localAchievementsKey, new SerializableAchievementsSerializer());
+                foreach(var local_ack in local_acks_data.achievements) {
+                    local_achievements.Add(
+                        local_ack.achievementId,
+                        new Achievement(definitions, local_ack)
+                    );
+                }
             }
         }
 
@@ -191,7 +249,7 @@ namespace Yurand.Timberborn.Achievements
             }
         }
 
-        private static readonly SingletonKey singletonKey = new SingletonKey(nameof(AchievementManager));
+        private static readonly SingletonKey singletonKey = new SingletonKey(nameof(AchievementManagerInGame));
         private static readonly PropertyKey<SerializableAchievements> localAchievementsKey = new PropertyKey<SerializableAchievements>("localAchievements");
     }
 }

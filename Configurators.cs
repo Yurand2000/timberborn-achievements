@@ -16,6 +16,8 @@ namespace Yurand.Timberborn.Achievements
         public void Configure(IContainerDefinition containerDefinition)
         {
             containerDefinition.Bind<AchievementManagerInGame>().AsSingleton();
+            containerDefinition.Bind<DebugConsoleMethods>().AsSingleton();
+            containerDefinition.Bind<SetAchievementStateMenu>().AsSingleton();
         }
     }
     
