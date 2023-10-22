@@ -4,6 +4,7 @@ using TimberApi.AssetSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.UiBuilderSystem;
 using TimberApi.UiBuilderSystem.ElementSystem;
+using Timberborn.Common;
 using Timberborn.CoreUI;
 using Timberborn.Localization;
 using UnityEngine;
@@ -66,12 +67,17 @@ namespace Yurand.Timberborn.Achievements.UI
 
             var panelContent = uiBuilder.CreateComponentBuilder().CreateVisualElement();
 
-            var achievements = achievementManager.GetLocalAchievements();
-            foreach(var ack in achievements) {
-                (float, float, bool)? status =
+            var global_acks = achievementManager.GetGlobalAchievements();
+            var local_acks = achievementManager.GetLocalAchievements();
+            foreach(var (key, ack) in global_acks) {
+                (float?, float, float, bool)? status =
                     ack.definition.statusDefinition.HasValue ?
-                    (ack.current_value ?? 0f, ack.definition.statusDefinition.Value.max_value, ack.definition.statusDefinition.Value.is_integer) :
-                    null;
+                    (  
+                        (local_acks?[key])?.current_value,
+                        ack.current_value ?? 0f,
+                        ack.definition.statusDefinition.Value.max_value,
+                        ack.definition.statusDefinition.Value.is_integer
+                    ) : null;
 
                 panelBuilder.AddComponent(makeAchievementBox(
                     ack.definition.localizedTitle,
@@ -81,7 +87,7 @@ namespace Yurand.Timberborn.Achievements.UI
                     status
                 ));
             }
-            
+
             panelBuilder.AddComponent(panelContent.Build());
 
             VisualElement root = panelBuilder
@@ -97,7 +103,7 @@ namespace Yurand.Timberborn.Achievements.UI
 
         public void OnUICancelled() {
             panelStack.Pop(this);
-            achievementManager.Save();
+            achievementManager.SaveGlobal();
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Achievement Menu Closed");
@@ -108,7 +114,7 @@ namespace Yurand.Timberborn.Achievements.UI
             return false;
         }
 
-        private VisualElement makeAchievementBox(string achievementName, bool completed, string achievementImagePath, string achievementDescription, (float, float, bool)? completitionBar = null)
+        private VisualElement makeAchievementBox(string achievementName, bool completed, string achievementImagePath, string achievementDescription, (float?, float, float, bool)? completitionBar = null)
         {
             var box_wrapper = uiBuilder.CreateBoxBuilder()
                 .SetWidth(new Length(700, Pixel))
@@ -176,8 +182,8 @@ namespace Yurand.Timberborn.Achievements.UI
             );
         }
 
-        private void BuildAchievementCompletitionBar(VisualElementBuilder text_box, (float, float, bool) completitionBar) {
-            var (current, max, is_int) = completitionBar;
+        private void BuildAchievementCompletitionBar(VisualElementBuilder text_box, (float?, float, float, bool) completitionBar) {
+            var (current_local, current_global, max, is_int) = completitionBar;
 
             text_box.AddComponent(wrapper => {
                 wrapper.SetStyle(style => {
@@ -201,11 +207,21 @@ namespace Yurand.Timberborn.Achievements.UI
                         style.borderRightWidth = 1; style.borderRightColor = Color.black;
                     }).AddComponent(bar => {
                         bar.SetStyle(style => {
-                            style.backgroundColor = new StyleColor(new Color(0, 0.4f, 0, 1));
-                            style.width = new Length(current / max * 100f, Percent);
+                            style.backgroundColor = new StyleColor(new Color(0, 0.3f, 0, 1));
+                            style.width = new Length(current_global / max * 100f, Percent);
                             style.height = new Length(100, Percent);
                         });
                     });
+
+                    if (current_local.HasValue) {
+                    bar_wrapper.AddComponent(bar => {
+                        bar.SetStyle(style => {
+                            style.backgroundColor = new StyleColor(new Color(0, 0.5f, 0, 1));
+                            style.width = new Length(current_local.Value / max * 100f, Percent);
+                            style.height = new Length(100, Percent);
+                        });
+                    });
+                    }
                 })
                 .AddComponent(label_wrapper => {
                     label_wrapper.SetStyle(style => {
@@ -216,16 +232,25 @@ namespace Yurand.Timberborn.Achievements.UI
                         style.flexWrap = Wrap.Wrap;
                     });
 
-                    var current_text = is_int ? $"{Convert.ToInt32(current)}" : $"{current}";
-                    var max_text = is_int ? $"{Convert.ToInt32(max)}" : $"{max}";                    
-                    label_wrapper.AddPreset(factory => factory.Labels().DefaultText(
-                        text: $"{current_text} / {max_text}",
-                        builder: builder => { builder.SetColor(Color.black); }
-                    ));                   
-                });                
+                    var current_global_text = is_int ? $"{Convert.ToInt32(current_global)}" : $"{current_global}";
+                    var max_text = is_int ? $"{Convert.ToInt32(max)}" : $"{max}";
+
+                    if (current_local.HasValue) {
+                        var current_local_text = is_int ? $"{Convert.ToInt32(current_local.Value)}" : $"{current_local.Value}";
+                        label_wrapper.AddPreset(factory => factory.Labels().DefaultText(
+                            text: $"{current_local_text} / {current_global_text} / {max_text}",
+                            builder: builder => { builder.SetColor(Color.black); }
+                        ));
+                    } else {
+                        label_wrapper.AddPreset(factory => factory.Labels().DefaultText(
+                            text: $"{current_global_text} / {max_text}",
+                            builder: builder => { builder.SetColor(Color.black); }
+                        ));
+                    }
+                });
             });
         }
-        
+
         private void BuildAchievementDescription(VisualElementBuilder text_box, string achievementDescription) {
             text_box.AddPreset(factory =>
                 factory.Labels().DefaultText(
