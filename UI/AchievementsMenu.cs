@@ -279,16 +279,13 @@ namespace Yurand.Timberborn.Achievements.UI
             box_wrapper.AddComponent(
                 builder => builder.SetStyle(style => {
                     style.backgroundColor = new StyleColor(Color.black);
-                    style.opacity = new StyleFloat(0.5f);
+                    style.opacity = new StyleFloat(0.25f);
                     style.position = Position.Absolute;
                     style.top = 0; style.left = 0;
                     style.right = 0; style.bottom = 0;
                 })
             );
         }
-
-        private static readonly string PositiveWellbeingClass = "wellbeing--positive";
-        private static readonly string NegativeWellbeingClass = "wellbeing--negative";
 
         private const string achievementsPanelHeaderLoc = "yurand.achievements.panel_header";
     }

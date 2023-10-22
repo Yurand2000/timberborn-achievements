@@ -40,10 +40,9 @@ namespace Yurand.Timberborn.Achievements
         private void LoadGlobal() {
             try {
                 var global_acks_data = System.IO.File.ReadAllText(PluginEntryPoint.directory + "/" + achievementFile);
-                var global_acks = XmlHelper.FromString<SerializableAchievements>(global_acks_data).achievements;
+                var global_acks = XmlHelper.FromString<SerializableAchievements>(global_acks_data).achievements ?? new SerializableAchievement[]{};
                 foreach (var achievement in global_acks) {
                     if (!achievementDefinitions.ContainsKey(achievement.achievementId)) continue;
-
                     var definition = achievementDefinitions[achievement.achievementId];
 
                     global_achievements.Add(
@@ -115,13 +114,15 @@ namespace Yurand.Timberborn.Achievements
             CreateLocalAchievementIfEmpty(achievementId);
             var definition = achievementDefinitions[achievementId];
 
-            if (completition >= local_achievements[achievementId].current_value)
+            if (completition >= local_achievements[achievementId].current_value) {
                 local_achievements[achievementId].current_value = completition;
+            }
 
             var max_value = definition.statusDefinition?.max_value ?? float.MaxValue;
-            if (completition >= max_value)
+            if (completition >= max_value) {
                 local_achievements[achievementId].current_value = max_value;
                 local_achievements[achievementId].completed = true;
+            }
 
             UpdateGlobalAchievementFromLocal(achievementId);
             return true;
@@ -135,8 +136,9 @@ namespace Yurand.Timberborn.Achievements
             local_achievements[achievementId].completed = completed;
             local_achievements[achievementId].current_value = completition;
              var max_value = definition.statusDefinition?.max_value ?? float.MaxValue;
-            if (completition >= max_value)
+            if (completition >= max_value) {
                 local_achievements[achievementId].current_value = max_value;
+            }
 
             if(update_global) UpdateGlobalAchievementFromLocal(achievementId);
             return true;

@@ -21,7 +21,7 @@ namespace Yurand.Timberborn.Achievements
         }
     }
     
-    [Configurator(SceneEntrypoint.InGame | SceneEntrypoint.MainMenu)]
+    [Configurator(SceneEntrypoint.All)]
     public class ManagerConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
