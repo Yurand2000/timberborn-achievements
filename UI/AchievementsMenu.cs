@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using TimberApi.AssetSystem;
+using TimberApi.AssetSystem.Exceptions;
 using TimberApi.ConsoleSystem;
 using TimberApi.UiBuilderSystem;
 using TimberApi.UiBuilderSystem.ElementSystem;
@@ -67,24 +68,29 @@ namespace Yurand.Timberborn.Achievements.UI
 
             var panelContent = uiBuilder.CreateComponentBuilder().CreateVisualElement();
 
+            var definitions = achievementManager.GetAchievementDefinitions();
             var global_acks = achievementManager.GetGlobalAchievements();
             var local_acks = achievementManager.GetLocalAchievements();
-            foreach(var (key, ack) in global_acks) {
-                (float?, float, float, bool)? status =
-                    ack.definition.statusDefinition.HasValue ?
-                    (  
-                        (local_acks?[key])?.current_value,
-                        ack.current_value ?? 0f,
-                        ack.definition.statusDefinition.Value.max_value,
-                        ack.definition.statusDefinition.Value.is_integer
-                    ) : null;
+
+            foreach(var (key, definition) in definitions) {
+                var status_def = definition.statusDefinition;
+                float? local_value = null;
+                float global_value = 0f;
+                bool completed = false;
+
+                if (global_acks.ContainsKey(key)) {
+                    var global_ack = global_acks[key];
+                    completed = global_ack.completed;
+                    local_value = (local_acks?[key])?.current_value;
+                    global_value = global_ack.current_value ?? 0f;
+                }
 
                 panelBuilder.AddComponent(makeAchievementBox(
-                    ack.definition.localizedTitle,
-                    ack.completed,
-                    ack.definition.imageFile,
-                    ack.definition.localizedDescription,
-                    status
+                    definition.localizedTitle,
+                    completed,
+                    definition.imageFile,
+                    definition.localizedDescription,
+                    status_def.HasValue ? ( local_value, global_value, status_def.Value.max_value, status_def.Value.is_integer ) : null
                 ));
             }
 
@@ -159,11 +165,19 @@ namespace Yurand.Timberborn.Achievements.UI
                     .SetPadding(new Length(12, Pixel))
                     .SetMargin(new Margin() { Right = new Length(10, Pixel) })
                     .AddComponent(
-                        builder => builder.AddComponent(new Image
-                        {
-                            image = assetLoader.Load<Texture2D>(achievementImagePath),
-                            style = { width = 120.0f, height = 120.0f }
-                        })
+                        builder => {
+                            Texture2D texture = null;
+                            try {
+                                texture = assetLoader.Load<Texture2D>(achievementImagePath ?? "");
+                            } catch (InvalidOperationException) {}
+                             catch (PrefixNotFoundException) {}
+
+                            builder.AddComponent(new Image
+                            {
+                                image = texture,
+                                style = { width = 120.0f, height = 120.0f }
+                            });
+                        }
                     )
             );
         }

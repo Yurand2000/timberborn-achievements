@@ -24,7 +24,7 @@ namespace Yurand.Timberborn.Achievements
         }
 
         public void Load() {
-            LoadDefinitions();
+            AddAchievementDefinitions(LoadDefinitions());
             LoadGlobal();
 
             if (PluginEntryPoint.debugLogging) {
@@ -33,9 +33,8 @@ namespace Yurand.Timberborn.Achievements
             }
         }
 
-        private void LoadDefinitions() {
-            foreach (var definition in makeAchievements())
-                achievementDefinitions.Add(definition.uniqueId, definition);
+        private List<AchievementDefinition> LoadDefinitions() {
+            return makeAchievements().ToList();
         }
 
         private void LoadGlobal() {
@@ -53,8 +52,6 @@ namespace Yurand.Timberborn.Achievements
                     );
                 }
             } catch (System.IO.FileNotFoundException) { }
-
-            AddMissingGlobalAchievements();
         }
 
         public void Unload() {
@@ -83,6 +80,16 @@ namespace Yurand.Timberborn.Achievements
             return new ReadOnlyDictionary<string, AchievementDefinition>(achievementDefinitions);
         }
 
+        public void AddAchievementDefinition(AchievementDefinition definition) {
+            achievementDefinitions.Add(definition.uniqueId, definition);
+        }
+        
+        public void AddAchievementDefinitions(IEnumerable<AchievementDefinition> definitions) {
+            foreach(var definition in definitions) {
+                achievementDefinitions.Add(definition.uniqueId, definition);
+            }
+        }
+
         public IDictionary<string, Achievement> GetGlobalAchievements() {
             return new ReadOnlyDictionary<string, Achievement>(global_achievements);
         }
@@ -96,6 +103,7 @@ namespace Yurand.Timberborn.Achievements
 
         public bool TryUpdateLocalAchievement(string achievementId, bool completed) {
             if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+            CreateLocalAchievementIfEmpty(achievementId);
 
             local_achievements[achievementId].completed = completed;
             UpdateGlobalAchievementFromLocal(achievementId);
@@ -104,6 +112,7 @@ namespace Yurand.Timberborn.Achievements
 
         public bool TryUpdateLocalAchievement(string achievementId, float completition) {
             if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+            CreateLocalAchievementIfEmpty(achievementId);
             var definition = achievementDefinitions[achievementId];
 
             if (completition >= local_achievements[achievementId].current_value)
@@ -120,6 +129,7 @@ namespace Yurand.Timberborn.Achievements
 
         public bool TryForceUpdateLocalAchievement(string achievementId, bool completed, float completition, bool update_global) {
             if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+            CreateLocalAchievementIfEmpty(achievementId);
             var definition = achievementDefinitions[achievementId];
 
             local_achievements[achievementId].completed = completed;
@@ -133,37 +143,37 @@ namespace Yurand.Timberborn.Achievements
         }
 
         private void UpdateGlobalAchievementFromLocal(string achievementId) {
+            CreateGlobalAchievementIfEmpty(achievementId);
             global_achievements[achievementId].completed = local_achievements[achievementId].completed;
             global_achievements[achievementId].current_value = local_achievements[achievementId].current_value;
         }
 
         public void ResetLocalAchievements() {
             local_achievements.Clear();
-            AddMissingLocalAchievements();
         }
 
         public void ResetGlobalAchievements() {
-            local_achievements.Clear();
-            AddMissingGlobalAchievements();
+            global_achievements.Clear();
         }
 
-        private void AddMissingGlobalAchievements() {
-            foreach (var key in achievementDefinitions.Keys.Except(global_achievements.Keys)) {
-                global_achievements.Add(key, new Achievement(achievementDefinitions[key]));
-            }
+        private void CreateGlobalAchievementIfEmpty(string achievementId) {
+            CreateAchievementIfEmptyInDictionary(achievementId, global_achievements);
         }
 
-        private void AddMissingLocalAchievements() {
-            foreach (var key in achievementDefinitions.Keys.Except(local_achievements.Keys)) {
-                local_achievements.Add(key, new Achievement(achievementDefinitions[key]));
+        private void CreateLocalAchievementIfEmpty(string achievementId) {
+            CreateAchievementIfEmptyInDictionary(achievementId, local_achievements);
+        }
+
+        private void CreateAchievementIfEmptyInDictionary(string achievementId, Dictionary<string, Achievement> dictionary) {
+            if (!dictionary.ContainsKey(achievementId)) {
+                var definition = achievementDefinitions[achievementId];
+                dictionary.Add(achievementId, new Achievement(definition));
             }
         }
 
         public void SetInGame(bool isInGame, Dictionary<string, Achievement> local_achievements) {
             this.isInGame = isInGame;
             this.local_achievements = local_achievements;
-            if (this.local_achievements is not null)
-                AddMissingLocalAchievements();
 
             if (PluginEntryPoint.debugLogging) {
                 if (this.isInGame)
