@@ -14,9 +14,9 @@ namespace Yurand.Timberborn.Achievements
         private const string achievementFile = "achievements.xml";
 
         private IConsoleWriter console;
-        private Dictionary<string, AchievementDefinition> achievementDefinitions = new Dictionary<string, AchievementDefinition>();
-        private Dictionary<string, Achievement> global_achievements = new Dictionary<string, Achievement>();
-        private Dictionary<string, Achievement> local_achievements = null;
+        private Dictionary<string, AchievementDefinitionBase> achievementDefinitions = new Dictionary<string, AchievementDefinitionBase>();
+        private Dictionary<string, AchievementBase> global_achievements = new Dictionary<string, AchievementBase>();
+        private Dictionary<string, AchievementBase> local_achievements = null;
         private bool isInGame = false;
 
         public AchievementManager(IConsoleWriter console) {
@@ -33,21 +33,21 @@ namespace Yurand.Timberborn.Achievements
             }
         }
 
-        private List<AchievementDefinition> LoadDefinitions() {
-            return makeAchievements().ToList();
+        private List<AchievementDefinitionBase> LoadDefinitions() {
+            return new List<AchievementDefinitionBase>();
         }
 
         private void LoadGlobal() {
             try {
                 var global_acks_data = System.IO.File.ReadAllText(PluginEntryPoint.directory + "/" + achievementFile);
-                var global_acks = XmlHelper.FromString<SerializableAchievements>(global_acks_data).achievements ?? new SerializableAchievement[]{};
+                var global_acks = XmlHelper.FromString<SerializableAchievements>(global_acks_data)?.achievements ?? new SerializableAchievementBase[]{};
                 foreach (var achievement in global_acks) {
                     if (!achievementDefinitions.ContainsKey(achievement.achievementId)) continue;
                     var definition = achievementDefinitions[achievement.achievementId];
 
                     global_achievements.Add(
                         achievement.achievementId,
-                        new Achievement(achievementDefinitions, achievement)
+                        AchievementSerializer.Deserialize(achievementDefinitions, achievement)
                     );
                 }
             } catch (System.IO.FileNotFoundException) { }
@@ -70,84 +70,57 @@ namespace Yurand.Timberborn.Achievements
             }
         }
 
-        public static SerializableAchievements SerializeAchievements(Dictionary<string, Achievement> achievements) {
-            var achievementsArray = achievements.Values.Select(ack => ack.ToSerializable()).ToArray();
+        public static SerializableAchievements SerializeAchievements(Dictionary<string, AchievementBase> achievements) {
+            var achievementsArray = achievements.Values.Select(ack => AchievementSerializer.Serialize(ack)).ToArray();
             return new SerializableAchievements(achievementsArray);
         }
 
-        public IDictionary<string, AchievementDefinition> GetAchievementDefinitions() {
-            return new ReadOnlyDictionary<string, AchievementDefinition>(achievementDefinitions);
+        public IDictionary<string, AchievementDefinitionBase> GetAchievementDefinitions() {
+            return new ReadOnlyDictionary<string, AchievementDefinitionBase>(achievementDefinitions);
         }
 
-        public void AddAchievementDefinition(AchievementDefinition definition) {
+        public void AddAchievementDefinition(AchievementDefinitionBase definition) {
             achievementDefinitions.Add(definition.uniqueId, definition);
         }
         
-        public void AddAchievementDefinitions(IEnumerable<AchievementDefinition> definitions) {
+        public void AddAchievementDefinitions(IEnumerable<AchievementDefinitionBase> definitions) {
             foreach(var definition in definitions) {
                 achievementDefinitions.Add(definition.uniqueId, definition);
             }
         }
 
-        public IDictionary<string, Achievement> GetGlobalAchievements() {
-            return new ReadOnlyDictionary<string, Achievement>(global_achievements);
+        public IDictionary<string, AchievementBase> GetGlobalAchievements() {
+            return new ReadOnlyDictionary<string, AchievementBase>(global_achievements);
         }
 
-        public IDictionary<string, Achievement> GetLocalAchievements() {
+        public IDictionary<string, AchievementBase> GetLocalAchievements() {
             if (isInGame)
-                return new ReadOnlyDictionary<string, Achievement>(local_achievements);
+                return new ReadOnlyDictionary<string, AchievementBase>(local_achievements);
             else
                 return null;
         }
 
-        public bool TryUpdateLocalAchievement(string achievementId, bool completed) {
+        public bool TryUpdateLocalAchievement(string achievementId, AchievementBase.Updater updater) {
             if (!achievementDefinitions.ContainsKey(achievementId)) return false;
             CreateLocalAchievementIfEmpty(achievementId);
 
-            local_achievements[achievementId].completed = completed;
+            local_achievements[achievementId].Update(updater);
             UpdateGlobalAchievementFromLocal(achievementId);
             return true;
         }
 
-        public bool TryUpdateLocalAchievement(string achievementId, float completition) {
+        public bool TryForceUpdateLocalAchievement(string achievementId, AchievementBase.Updater updater, bool update_global) {
             if (!achievementDefinitions.ContainsKey(achievementId)) return false;
             CreateLocalAchievementIfEmpty(achievementId);
-            var definition = achievementDefinitions[achievementId];
 
-            if (completition >= local_achievements[achievementId].current_value) {
-                local_achievements[achievementId].current_value = completition;
-            }
-
-            var max_value = definition.statusDefinition?.max_value ?? float.MaxValue;
-            if (completition >= max_value) {
-                local_achievements[achievementId].current_value = max_value;
-                local_achievements[achievementId].completed = true;
-            }
-
-            UpdateGlobalAchievementFromLocal(achievementId);
-            return true;
-        }
-
-        public bool TryForceUpdateLocalAchievement(string achievementId, bool completed, float completition, bool update_global) {
-            if (!achievementDefinitions.ContainsKey(achievementId)) return false;
-            CreateLocalAchievementIfEmpty(achievementId);
-            var definition = achievementDefinitions[achievementId];
-
-            local_achievements[achievementId].completed = completed;
-            local_achievements[achievementId].current_value = completition;
-             var max_value = definition.statusDefinition?.max_value ?? float.MaxValue;
-            if (completition >= max_value) {
-                local_achievements[achievementId].current_value = max_value;
-            }
-
+            local_achievements[achievementId].Update(updater);
             if(update_global) UpdateGlobalAchievementFromLocal(achievementId);
             return true;
         }
 
         private void UpdateGlobalAchievementFromLocal(string achievementId) {
             CreateGlobalAchievementIfEmpty(achievementId);
-            global_achievements[achievementId].completed = local_achievements[achievementId].completed;
-            global_achievements[achievementId].current_value = local_achievements[achievementId].current_value;
+            global_achievements[achievementId].UpdateFromLocal(local_achievements[achievementId]);
         }
 
         public void ResetLocalAchievements() {
@@ -166,14 +139,14 @@ namespace Yurand.Timberborn.Achievements
             CreateAchievementIfEmptyInDictionary(achievementId, local_achievements);
         }
 
-        private void CreateAchievementIfEmptyInDictionary(string achievementId, Dictionary<string, Achievement> dictionary) {
+        private void CreateAchievementIfEmptyInDictionary(string achievementId, Dictionary<string, AchievementBase> dictionary) {
             if (!dictionary.ContainsKey(achievementId)) {
                 var definition = achievementDefinitions[achievementId];
-                dictionary.Add(achievementId, new Achievement(definition));
+                dictionary.Add(achievementId, AchievementSerializer.Default(definition));
             }
         }
 
-        public void SetInGame(bool isInGame, Dictionary<string, Achievement> local_achievements) {
+        public void SetInGame(bool isInGame, Dictionary<string, AchievementBase> local_achievements) {
             this.isInGame = isInGame;
             this.local_achievements = local_achievements;
 
@@ -184,28 +157,6 @@ namespace Yurand.Timberborn.Achievements
                     console.LogInfo("Achievement Manager set to NOT in game");
             }
         }
-
-        private AchievementDefinition[] makeAchievements() {
-            return new AchievementDefinition[] {
-                new AchievementDefinition(
-                    "testAch00",
-                    "AchievementsBase/Resources/testicon.png",
-                    "achievement 00 title",
-                    "achievement 00 description"),
-                new AchievementDefinition(
-                    "testAch01",
-                    "AchievementsBase/Resources/testicon.png",
-                    "achievement 01 title",
-                    "achievement 01 description",
-                    100.15f, false),
-                new AchievementDefinition(
-                    "testAch02",
-                    "AchievementsBase/Resources/testicon.png",
-                    "achievement 02 title",
-                    "achievement 02 description",
-                    1000, true),
-            };
-        }
     }
 
     public class AchievementManagerInGame : ILoadableSingleton, ISaveableSingleton, IUnloadableSingleton
@@ -213,7 +164,7 @@ namespace Yurand.Timberborn.Achievements
         private AchievementManager manager;
         private IConsoleWriter console;
         private ISingletonLoader singletonLoader;
-        private Dictionary<string, Achievement> local_achievements = new Dictionary<string, Achievement>();
+        private Dictionary<string, AchievementBase> local_achievements = new Dictionary<string, AchievementBase>();
         public AchievementManagerInGame(AchievementManager manager, ISingletonLoader singletonLoader, IConsoleWriter console) {
             this.manager = manager;
             this.singletonLoader = singletonLoader;
@@ -238,7 +189,7 @@ namespace Yurand.Timberborn.Achievements
                 foreach(var local_ack in local_acks_data.achievements) {
                     local_achievements.Add(
                         local_ack.achievementId,
-                        new Achievement(definitions, local_ack)
+                        AchievementSerializer.Deserialize(definitions, local_ack)
                     );
                 }
             }

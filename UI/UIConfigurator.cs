@@ -20,6 +20,7 @@ namespace Yurand.Timberborn.Achievements.UI
         public void Configure(IContainerDefinition containerDefinition)
         {
             containerDefinition.Bind<AchievementsMenu>().AsSingleton();
+            containerDefinition.Bind<AchievementBoxFactory>().AsSingleton();
         }
     }
 }

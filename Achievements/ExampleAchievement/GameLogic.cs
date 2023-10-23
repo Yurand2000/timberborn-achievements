@@ -27,7 +27,7 @@ namespace Yurand.Timberborn.Achievements.ExampleAchievement
     public class Patcher {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinition> __result) {
+        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
             if (PluginEntryPoint.debugLogging) {
                 PluginEntryPoint.console.LogInfo("ExampleAchievement definition loaded.");
             }

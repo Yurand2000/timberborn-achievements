@@ -29,14 +29,15 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
         [OnEvent]
         public void OnNewDayEvent(DaytimeStartEvent daytimeStartEvent) {
             var current_cycle = weatherService.Cycle;
+            var updater = new AchievementWithCompletition.Updater(){ next_state = current_cycle };
 
-            manager.TryUpdateLocalAchievement(buildColony5Id, current_cycle);
-            manager.TryUpdateLocalAchievement(buildColony10Id, current_cycle);
-            manager.TryUpdateLocalAchievement(buildColony15Id, current_cycle);
-            manager.TryUpdateLocalAchievement(buildColony20Id, current_cycle);
-            manager.TryUpdateLocalAchievement(buildColony30Id, current_cycle);
-            manager.TryUpdateLocalAchievement(buildColony50Id, current_cycle);
-            manager.TryUpdateLocalAchievement(buildColony100Id, current_cycle);
+            manager.TryUpdateLocalAchievement(buildColony5Id, updater);
+            manager.TryUpdateLocalAchievement(buildColony10Id, updater);
+            manager.TryUpdateLocalAchievement(buildColony15Id, updater);
+            manager.TryUpdateLocalAchievement(buildColony20Id, updater);
+            manager.TryUpdateLocalAchievement(buildColony30Id, updater);
+            manager.TryUpdateLocalAchievement(buildColony50Id, updater);
+            manager.TryUpdateLocalAchievement(buildColony100Id, updater);
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Updated buildColonyX achievements.");
@@ -56,14 +57,14 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
     public class Patcher {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinition> __result) {
-            __result.Add(new AchievementDefinition(GameLogic.buildColony5Id, buildColony5Image, buildColony5Title, buildColony5Description, 5, true));
-            __result.Add(new AchievementDefinition(GameLogic.buildColony10Id, buildColony10Image, buildColony10Title, buildColony10Description, 10, true));
-            __result.Add(new AchievementDefinition(GameLogic.buildColony15Id, buildColony15Image, buildColony15Title, buildColony15Description, 15, true));
-            __result.Add(new AchievementDefinition(GameLogic.buildColony20Id, buildColony20Image, buildColony20Title, buildColony20Description, 20, true));
-            __result.Add(new AchievementDefinition(GameLogic.buildColony30Id, buildColony30Image, buildColony30Title, buildColony30Description, 30, true));
-            __result.Add(new AchievementDefinition(GameLogic.buildColony50Id, buildColony50Image, buildColony50Title, buildColony50Description, 50, true));
-            __result.Add(new AchievementDefinition(GameLogic.buildColony100Id, buildColony100Image, buildColony100Title, buildColony100Description, 100, true));
+        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony5Id, buildColony5Image, buildColony5Title, buildColony5Description, 5, true));
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony10Id, buildColony10Image, buildColony10Title, buildColony10Description, 10, true));
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony15Id, buildColony15Image, buildColony15Title, buildColony15Description, 15, true));
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony20Id, buildColony20Image, buildColony20Title, buildColony20Description, 20, true));
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony30Id, buildColony30Image, buildColony30Title, buildColony30Description, 30, true));
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony50Id, buildColony50Image, buildColony50Title, buildColony50Description, 50, true));
+            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony100Id, buildColony100Image, buildColony100Title, buildColony100Description, 100, true));
         }
         private const string buildColony5Title = "yurand.achievements.buildColony5.title";
         private const string buildColony5Description = "yurand.achievements.buildColony5.description";
