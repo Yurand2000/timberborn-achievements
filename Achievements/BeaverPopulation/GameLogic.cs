@@ -3,50 +3,86 @@ using HarmonyLib;
 using TimberApi.ConsoleSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.Beavers;
+using Timberborn.Persistence;
+using Timberborn.Characters;
 
 namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
 {
     [HarmonyPatch]
-    public class GameLogic : ILoadableSingleton
+    public class GameLogic : ILoadableSingleton, ISaveableSingleton
     {
         private static GameLogic logic;
         private EventBus eventBus;
         private IConsoleWriter console;
         private AchievementManager manager;
         private BeaverPopulation beaverPopulation;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, BeaverPopulation beaverPopulation) {
+        private ISingletonLoader singletonLoader;
+        private int max_beavers;
+        private int current_beavers;
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, BeaverPopulation beaverPopulation, ISingletonLoader singletonLoader) {
             this.eventBus = eventBus;
             this.console = console;
             this.manager = manager;
             this.beaverPopulation = beaverPopulation;
+            this.singletonLoader = singletonLoader;
+            this.max_beavers = 0;
+            this.current_beavers = 0;
             logic = this;
         }
 
         public void Load() {
             eventBus.Register(this);
+
+            if (singletonLoader.HasSingleton(singletonKey)) {
+                var loader = singletonLoader.GetSingleton(singletonKey);
+                if (loader.Has(propertyMaxBeavers))
+                    max_beavers = loader.Get(propertyMaxBeavers);
+            } else {
+                max_beavers = 0;
+            }
             UpdateBeaverCounters();
         }
 
-        public void UpdateBeaverCounters() {
-            var beavers = beaverPopulation.NumberOfBeavers;
-            var updater = new AchievementWithCompletition.Updater(){ next_state = beavers };
+        public void Save(ISingletonSaver singletonSaver)
+        {
+            var saver = singletonSaver.GetSingleton(singletonKey);
+            saver.Set(propertyMaxBeavers, max_beavers);
+        }
 
-            manager.TryUpdateLocalAchievement(beaverPopulation50Id, updater);
-            manager.TryUpdateLocalAchievement(beaverPopulation100Id, updater);
-            manager.TryUpdateLocalAchievement(beaverPopulation200Id, updater);
-            manager.TryUpdateLocalAchievement(beaverPopulation300Id, updater);
-            manager.TryUpdateLocalAchievement(beaverPopulation500Id, updater);
+        [OnEvent]
+        public void OnCharacterCreated(CharacterCreatedEvent characterCreatedEvent)
+        {
+            Beaver componentFast = characterCreatedEvent.Character.GetComponentFast<Beaver>();
+            if ((object)componentFast != null) {
+                current_beavers += 1;
+                if (current_beavers > max_beavers) {
+                    max_beavers = current_beavers;
+                    UpdateBeaverCounters();
+                }
+            }
+        }
+
+        [OnEvent]
+        public void OnCharacterKilled(CharacterKilledEvent characterKilledEvent)
+        {
+            Beaver componentFast = characterKilledEvent.Character.GetComponentFast<Beaver>();
+            if ((object)componentFast != null) {
+                current_beavers -= 1;
+            }
+        }
+
+        private void UpdateBeaverCounters() {
+            var updater = new AchievementWithCompletition.Updater(){ next_state = max_beavers };
+
+            manager.UpdateLocalAchievement(beaverPopulation50Id, updater);
+            manager.UpdateLocalAchievement(beaverPopulation100Id, updater);
+            manager.UpdateLocalAchievement(beaverPopulation200Id, updater);
+            manager.UpdateLocalAchievement(beaverPopulation300Id, updater);
+            manager.UpdateLocalAchievement(beaverPopulation500Id, updater);
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Updated beaverPopulationX achievements.");
             }
-        }
-
-        [HarmonyPatch(typeof(BeaverPopulation), "OnCharacterCreated")]
-        [HarmonyPostfix]
-        public static void OnCharactedCreatedPostfix() {
-            if (logic is null) return;
-            logic.UpdateBeaverCounters();
         }
 
         public const string beaverPopulation50Id = "beaverPopulation50";
@@ -54,6 +90,8 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
         public const string beaverPopulation200Id = "beaverPopulation200";
         public const string beaverPopulation300Id = "beaverPopulation300";
         public const string beaverPopulation500Id = "beaverPopulation500";
+        private readonly SingletonKey singletonKey = new SingletonKey(typeof(GameLogic).FullName);
+        private readonly PropertyKey<int> propertyMaxBeavers = new PropertyKey<int>("max_beavers");
     }
 
     [HarmonyPatch]
@@ -70,18 +108,18 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
         
         private const string beaverPopulation50Title = "yurand.achievements.beaverPopulation50.title";
         private const string beaverPopulation50Description = "yurand.achievements.beaverPopulation50.description";
-        private const string beaverPopulation50Image = null;
+        private const string beaverPopulation50Image = "yurand.achievements.beaverPopulation50.image";
         private const string beaverPopulation100Title = "yurand.achievements.beaverPopulation100.title";
         private const string beaverPopulation100Description = "yurand.achievements.beaverPopulation100.description";
-        private const string beaverPopulation100Image = null;
+        private const string beaverPopulation100Image = "yurand.achievements.beaverPopulation100.image";
         private const string beaverPopulation200Title = "yurand.achievements.beaverPopulation200.title";
         private const string beaverPopulation200Description = "yurand.achievements.beaverPopulation200.description";
-        private const string beaverPopulation200Image = null;
+        private const string beaverPopulation200Image = "yurand.achievements.beaverPopulation200.image";
         private const string beaverPopulation300Title = "yurand.achievements.beaverPopulation300.title";
         private const string beaverPopulation300Description = "yurand.achievements.beaverPopulation300.description";
-        private const string beaverPopulation300Image = null;
+        private const string beaverPopulation300Image = "yurand.achievements.beaverPopulation300.image";
         private const string beaverPopulation500Title = "yurand.achievements.beaverPopulation500.title";
         private const string beaverPopulation500Description = "yurand.achievements.beaverPopulation500.description";
-        private const string beaverPopulation500Image = null;
+        private const string beaverPopulation500Image = "yurand.achievements.beaverPopulation500.image";
     }
 }

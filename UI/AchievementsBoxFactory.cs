@@ -3,6 +3,7 @@ using TimberApi.AssetSystem;
 using TimberApi.AssetSystem.Exceptions;
 using TimberApi.UiBuilderSystem;
 using TimberApi.UiBuilderSystem.ElementSystem;
+using Timberborn.Localization;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEngine.UIElements.LengthUnit;
@@ -12,18 +13,21 @@ namespace Yurand.Timberborn.Achievements.UI
     public class AchievementBoxFactory
     {
         private UIBuilder uiBuilder;
-        private IAssetLoader assetLoader;
+        private ImageLoader imageLoader;
         public AchievementBoxFactory(
             UIBuilder uiBuilder,
-            IAssetLoader assetLoader
+            ImageLoader imageLoader
         ) {
             this.uiBuilder = uiBuilder;
-            this.assetLoader = assetLoader;
+            this.imageLoader = imageLoader;
         }
 
-        public VisualElement MakeAchievementBox(AchievementBase localAchievementBase, AchievementBase globalAchievementBase)
+        public VisualElement MakeAchievementBox(AchievementBase globalAchievementBase, AchievementBase localAchievementBase)
         {
-            if (localAchievementBase.GetType() != globalAchievementBase.GetType())
+            if (globalAchievementBase is null)
+                throw new ArgumentException($"No achievement structure has been supplied.");
+
+            if (localAchievementBase is not null && localAchievementBase.GetType() != globalAchievementBase.GetType())
                 throw new ArgumentException($"Cannot build achievement box for global type {globalAchievementBase.GetType().Name} but local type {localAchievementBase.GetType().Name}");
 
             switch (globalAchievementBase) {
@@ -62,7 +66,7 @@ namespace Yurand.Timberborn.Achievements.UI
                 });
 
                 box_builder.AddComponent(builder => {
-                    builder.SetStyle(style => { style.width = new Length(490, Pixel); style.marginRight = new Length(10, Pixel); });
+                    builder.SetStyle(style => { style.width = new Length(480, Pixel); style.marginRight = new Length(10, Pixel); });
                     right_box_builder(builder);
                 });
             });
@@ -84,7 +88,7 @@ namespace Yurand.Timberborn.Achievements.UI
             return MakeAchievementBoxBase(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
                 BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
                 BuildAchievementCompletitionBar(builder,
-                    localAchievement.current_state,
+                    localAchievement?.current_state ?? 0f,
                     globalAchievement.current_state,
                     globalAchievement.GetDefinition().max_completition,
                     globalAchievement.GetDefinition().as_integer
@@ -95,25 +99,44 @@ namespace Yurand.Timberborn.Achievements.UI
 
         private void BuildAchievementImage(VisualElementBuilder builder, string achievementImagePath)
         {
+            const float imageSize = 128f;
+
             builder.AddClass(TimberApiStyle.Backgrounds.BorderTransparent)
                 .AddClass(TimberApiStyle.Scales.Scale2)
                 .SetPadding(new Length(12, Pixel))
                 .SetMargin(new Margin() { Right = new Length(10, Pixel) })
-                .AddComponent(
-                    builder => {
-                        Texture2D texture = null;
-                        try {
-                            texture = assetLoader.Load<Texture2D>(achievementImagePath ?? "");
-                        } catch (InvalidOperationException) {}
-                            catch (PrefixNotFoundException) {}
-
-                        builder.AddComponent(new Image
-                        {
-                            image = texture,
-                            style = { width = 120.0f, height = 120.0f }
-                        });
-                    }
-                );
+                .AddComponent(inner_builder => {
+                    inner_builder.SetStyle(style => {
+                        style.flexDirection = FlexDirection.Column;
+                        style.flexWrap = Wrap.Wrap;
+                    })
+                    .AddComponent(image_wrapper => {
+                        image_wrapper.AddComponent(
+                            builder => {
+                                builder.AddComponent(new Image
+                                {
+                                    image = imageLoader.GetTexture(achievementBackgroundImage),
+                                    style = { width = imageSize, height = imageSize }
+                                });
+                            }
+                        );
+                    })
+                    .AddComponent(image_wrapper => {
+                        image_wrapper.SetStyle(style => {
+                            style.position = Position.Absolute;
+                            style.top = 0; style.left = 0;
+                        }).AddComponent(
+                            builder => {
+                                builder.AddComponent(new Image
+                                {
+                                    image = imageLoader.GetTexture(achievementImagePath),
+                                    style = { width = imageSize, height = imageSize }
+                                });
+                            }
+                        );
+                    });
+                });
+                
         }
 
         private void BuildAchievementTitle(VisualElementBuilder text_box, string achievementName) {
@@ -218,5 +241,7 @@ namespace Yurand.Timberborn.Achievements.UI
                 })
             );
         }
+
+        private const string achievementBackgroundImage = "yurand.achievements.backgroundImage";
     }
 }

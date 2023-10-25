@@ -31,13 +31,13 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
             var current_cycle = weatherService.Cycle;
             var updater = new AchievementWithCompletition.Updater(){ next_state = current_cycle };
 
-            manager.TryUpdateLocalAchievement(buildColony5Id, updater);
-            manager.TryUpdateLocalAchievement(buildColony10Id, updater);
-            manager.TryUpdateLocalAchievement(buildColony15Id, updater);
-            manager.TryUpdateLocalAchievement(buildColony20Id, updater);
-            manager.TryUpdateLocalAchievement(buildColony30Id, updater);
-            manager.TryUpdateLocalAchievement(buildColony50Id, updater);
-            manager.TryUpdateLocalAchievement(buildColony100Id, updater);
+            manager.UpdateLocalAchievement(buildColony5Id, updater);
+            manager.UpdateLocalAchievement(buildColony10Id, updater);
+            manager.UpdateLocalAchievement(buildColony15Id, updater);
+            manager.UpdateLocalAchievement(buildColony20Id, updater);
+            manager.UpdateLocalAchievement(buildColony30Id, updater);
+            manager.UpdateLocalAchievement(buildColony50Id, updater);
+            manager.UpdateLocalAchievement(buildColony100Id, updater);
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Updated buildColonyX achievements.");
@@ -68,24 +68,24 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
         }
         private const string buildColony5Title = "yurand.achievements.buildColony5.title";
         private const string buildColony5Description = "yurand.achievements.buildColony5.description";
-        private const string buildColony5Image = null;
+        private const string buildColony5Image = "yurand.achievements.buildColony5.image";
         private const string buildColony10Title = "yurand.achievements.buildColony10.title";
         private const string buildColony10Description = "yurand.achievements.buildColony10.description";
-        private const string buildColony10Image = null;
+        private const string buildColony10Image = "yurand.achievements.buildColony10.image";
         private const string buildColony15Title = "yurand.achievements.buildColony15.title";
         private const string buildColony15Description = "yurand.achievements.buildColony15.description";
-        private const string buildColony15Image = null;
+        private const string buildColony15Image = "yurand.achievements.buildColony15.image";
         private const string buildColony20Title = "yurand.achievements.buildColony20.title";
         private const string buildColony20Description = "yurand.achievements.buildColony20.description";
-        private const string buildColony20Image = null;
+        private const string buildColony20Image = "yurand.achievements.buildColony20.image";
         private const string buildColony30Title = "yurand.achievements.buildColony30.title";
         private const string buildColony30Description = "yurand.achievements.buildColony30.description";
-        private const string buildColony30Image = null;
+        private const string buildColony30Image = "yurand.achievements.buildColony30.image";
         private const string buildColony50Title = "yurand.achievements.buildColony50.title";
         private const string buildColony50Description = "yurand.achievements.buildColony50.description";
-        private const string buildColony50Image = null;
+        private const string buildColony50Image = "yurand.achievements.buildColony50.image";
         private const string buildColony100Title = "yurand.achievements.buildColony100.title";
         private const string buildColony100Description = "yurand.achievements.buildColony100.description";
-        private const string buildColony100Image = null;
+        private const string buildColony100Image = "yurand.achievements.buildColony100.image";
     }
 }

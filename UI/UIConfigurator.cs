@@ -14,13 +14,14 @@ using HarmonyLib;
 
 namespace Yurand.Timberborn.Achievements.UI
 {
-    [Configurator(SceneEntrypoint.InGame | SceneEntrypoint.MainMenu)]
+    [Configurator(SceneEntrypoint.All)]
     public class UIConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
             containerDefinition.Bind<AchievementsMenu>().AsSingleton();
             containerDefinition.Bind<AchievementBoxFactory>().AsSingleton();
+            containerDefinition.Bind<ImageLoader>().AsSingleton();
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Yurand.Timberborn.Achievements.UI
             panelStack.HideAndPush(this);
 
             if (PluginEntryPoint.debugLogging) {
-                console.LogInfo("Anchievements Menu Opened");
+                console.LogInfo("Achievements Menu Opened");
             }
         }
 
@@ -61,14 +61,12 @@ namespace Yurand.Timberborn.Achievements.UI
                 );
 
             var definitions = achievementManager.GetAchievementDefinitions();
-            var global_acks = achievementManager.GetGlobalAchievements();
-            var local_acks = achievementManager.GetLocalAchievements();
 
             foreach(var key in definitions.Keys) {
-                var global_achievement = global_acks[key];
-                var local_achievement = local_acks[key];
-
-                var achievementBox = achievementBoxFactory.MakeAchievementBox(local_achievement, global_achievement);
+                var global_achievement = achievementManager.GetGlobalAchievement(key);
+                var local_achievement = achievementManager.GetLocalAchievement(key);
+                
+                var achievementBox = achievementBoxFactory.MakeAchievementBox(global_achievement, local_achievement);
                 panelBuilder.AddComponent(achievementBox);
             }
 
@@ -88,7 +86,7 @@ namespace Yurand.Timberborn.Achievements.UI
             achievementManager.SaveGlobal();
 
             if (PluginEntryPoint.debugLogging) {
-                console.LogInfo("Achievement Menu Closed");
+                console.LogInfo("Achievements Menu Closed");
             }
         }
 

@@ -16,7 +16,7 @@ namespace Yurand.Timberborn.Achievements
             this.completed = completed;
         }
 
-        public abstract bool Update(Updater updater);
+        public abstract void Update(Updater updater);
         public abstract void UpdateFromLocal(AchievementBase achievement);
         public class Updater {}
     }
@@ -27,12 +27,11 @@ namespace Yurand.Timberborn.Achievements
 
         public AchievementSimpleDefinition GetDefinition() { return (AchievementSimpleDefinition)definition; }
 
-        public override bool Update(AchievementBase.Updater updaterBase) {
+        public override void Update(AchievementBase.Updater updaterBase) {
             var updater = (Updater)updaterBase;
-            if (updater is null) return false;
+            if (updater is null) return;
 
             this.completed = updater.completed;
-            return true;
         }
 
         public override void UpdateFromLocal(AchievementBase achievementBase) {
@@ -56,16 +55,15 @@ namespace Yurand.Timberborn.Achievements
 
         public AchievementWithCompletitionDefinition GetDefinition() { return (AchievementWithCompletitionDefinition)definition; }
 
-        public override bool Update(AchievementBase.Updater updaterBase) {
+        public override void Update(AchievementBase.Updater updaterBase) {
             var updater = (Updater)updaterBase;
-            if (updater is null) return false;
+            if (updater is null) return;
 
             var max = GetDefinition().max_completition;
             this.current_state = Math.Clamp(updater.next_state, 0, max);
             if (this.current_state == max) this.completed = true;
 
             this.completed = updater.force_complete ?? this.completed;
-            return true;
         }
 
         public override void UpdateFromLocal(AchievementBase achievementBase) {
@@ -91,17 +89,15 @@ namespace Yurand.Timberborn.Achievements
 
         public AchievementWithCompletitionTieredDefinition GetDefinition() { return (AchievementWithCompletitionTieredDefinition)definition; }
 
-        public override bool Update(AchievementBase.Updater updaterBase) {
+        public override void Update(AchievementBase.Updater updaterBase) {
             var updater = (Updater)updaterBase;
-            if (updater is null) return false;
+            if (updater is null) return;
 
             var max = GetMaxCompletition();
             this.current_state = Math.Clamp(updater.next_state, 0, max);
             if (this.current_state == max) this.completed = true;
 
-
             this.completed = updater.force_complete ?? this.completed;
-            return true;
         }
 
         public override void UpdateFromLocal(AchievementBase achievementBase) {
@@ -136,7 +132,7 @@ namespace Yurand.Timberborn.Achievements
     public class SerializableAchievementBase {
         [XmlAttribute("id")] public string achievementId;
         [XmlAttribute("completed")] public bool completed;
-
+        public SerializableAchievementBase() { achievementId = null; completed = false; }
         public SerializableAchievementBase(string achievementId, bool completed)
         {
             this.achievementId = achievementId;
@@ -155,6 +151,7 @@ namespace Yurand.Timberborn.Achievements
     [Serializable]
     public class SerializableAchievementSimple : SerializableAchievementBase
     {
+        public SerializableAchievementSimple() : base() {}
         public SerializableAchievementSimple(SerializableAchievementBase other) : base(other) {}
         public SerializableAchievementSimple(AchievementSimple achievement) : base(achievement) { }
     }
@@ -163,6 +160,7 @@ namespace Yurand.Timberborn.Achievements
     public class SerializableAchievementWithCompletition : SerializableAchievementBase
     {
         [XmlElement("current_state")] public float current_state;
+        public SerializableAchievementWithCompletition() : base() { current_state = 0; }
         public SerializableAchievementWithCompletition(SerializableAchievementBase other, float current_state) : base(other)
         {
             this.current_state = current_state;
@@ -177,6 +175,7 @@ namespace Yurand.Timberborn.Achievements
     public class SerializableAchievementWithCompletitionTiered : SerializableAchievementBase
     {
         [XmlElement("current_state")] public float current_state;
+        public SerializableAchievementWithCompletitionTiered() : base() { current_state = 0; }
         public SerializableAchievementWithCompletitionTiered(SerializableAchievementBase other, float current_state) : base(other)
         {
             this.current_state = current_state;
@@ -189,22 +188,58 @@ namespace Yurand.Timberborn.Achievements
 
     public class AchievementSerializer
     {
-        public static AchievementBase Default(AchievementDefinitionBase definition) {
-            return null;
+        public static AchievementBase Default(AchievementDefinitionBase definitionBase) {
+            switch (definitionBase) {
+                case AchievementSimpleDefinition achievement:
+                    return new AchievementSimple(achievement);
+                case AchievementWithCompletitionDefinition achievement:
+                    return new AchievementWithCompletition(achievement);
+                case AchievementWithCompletitionTieredDefinition achievement:
+                    return new AchievementWithCompletitionTiered(achievement);
+                default:
+                    throw new ArgumentException($"Cannot provide default achievement for definition of type {definitionBase.GetType().Name}");
+            }
         }
         public static AchievementBase Deserialize(IDictionary<string, AchievementDefinitionBase> definitions, SerializableAchievementBase value) {
-            return null;
+            var definition = definitions[value.achievementId];
+            switch (value) {
+                case SerializableAchievementSimple serialized:
+                    return new AchievementSimple(
+                        (AchievementSimpleDefinition)definition,
+                        serialized.completed
+                    );
+                case SerializableAchievementWithCompletition serialized:
+                    return new AchievementWithCompletition((
+                        AchievementWithCompletitionDefinition)definition,
+                        serialized.completed, serialized.current_state
+                    );
+                case SerializableAchievementWithCompletitionTiered serialized:
+                    return new AchievementWithCompletitionTiered(
+                        (AchievementWithCompletitionTieredDefinition) definition,
+                        serialized.completed, serialized.current_state
+                    );
+                default:
+                    throw new ArgumentException($"Cannot provide serializable achievement for achievement type {value.GetType().Name}");
+            }
         }
 
         public static SerializableAchievementBase Serialize(AchievementBase value) {
-            return null;
+            switch (value) {
+                case AchievementSimple achievement:
+                    return new SerializableAchievementSimple(achievement);
+                case AchievementWithCompletition achievement:
+                    return new SerializableAchievementWithCompletition(achievement);
+                case AchievementWithCompletitionTiered achievement:
+                    return new SerializableAchievementWithCompletitionTiered(achievement);
+                default:
+                    throw new ArgumentException($"Cannot provide serializable achievement for achievement type {value.GetType().Name}");
+            }
         }
     }
 
     public class SerializableAchievementSerializer : IObjectSerializer<SerializableAchievementBase>
     {
-        public Obsoletable<SerializableAchievementBase> Deserialize(IObjectLoader objectLoader)
-        {
+        public Obsoletable<SerializableAchievementBase> Deserialize(IObjectLoader objectLoader) {
             var type = objectLoader.Get(achievementTypeKey);
             var baseAch = DeserializeBase(objectLoader);
             switch (type) {
@@ -226,8 +261,7 @@ namespace Yurand.Timberborn.Achievements
             );
         }
 
-        public void Serialize(SerializableAchievementBase value, IObjectSaver objectSaver)
-        {
+        public void Serialize(SerializableAchievementBase value, IObjectSaver objectSaver) {
             objectSaver.Set(achievementIdKey, value.achievementId);
             objectSaver.Set(completedKey, value.completed);
             switch (value) {
@@ -258,7 +292,13 @@ namespace Yurand.Timberborn.Achievements
     [Serializable]
     [XmlRoot("Achievements")]
     public class SerializableAchievements {
-        [XmlElement(ElementName = "Achievement")] public SerializableAchievementBase[] achievements;
+        
+        [XmlElement(ElementName = "AchievementBase")]
+        [XmlElement(Type = typeof(SerializableAchievementSimple), ElementName = "AchievementSimple")]
+        [XmlElement(Type = typeof(SerializableAchievementWithCompletition), ElementName = "AchievementWithCompletition")]
+        [XmlElement(Type = typeof(SerializableAchievementWithCompletitionTiered), ElementName = "AchievementWithCompletitionTiered")]
+        public SerializableAchievementBase[] achievements;
+        public SerializableAchievements() { achievements = null; }
         public SerializableAchievements(SerializableAchievementBase[] achievements) {
             this.achievements = achievements;
         }

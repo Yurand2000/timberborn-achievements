@@ -88,34 +88,13 @@ namespace Yurand.Timberborn.Achievements
                 achievementDefinitions.Add(definition.uniqueId, definition);
             }
         }
-
-        public IDictionary<string, AchievementBase> GetGlobalAchievements() {
-            return new ReadOnlyDictionary<string, AchievementBase>(global_achievements);
-        }
-
-        public IDictionary<string, AchievementBase> GetLocalAchievements() {
-            if (isInGame)
-                return new ReadOnlyDictionary<string, AchievementBase>(local_achievements);
-            else
-                return null;
-        }
-
-        public bool TryUpdateLocalAchievement(string achievementId, AchievementBase.Updater updater) {
-            if (!achievementDefinitions.ContainsKey(achievementId)) return false;
+        public void UpdateLocalAchievement(string achievementId, AchievementBase.Updater updater, bool update_global = true) {
+            if (!achievementDefinitions.ContainsKey(achievementId)) return;
             CreateLocalAchievementIfEmpty(achievementId);
 
             local_achievements[achievementId].Update(updater);
-            UpdateGlobalAchievementFromLocal(achievementId);
-            return true;
-        }
-
-        public bool TryForceUpdateLocalAchievement(string achievementId, AchievementBase.Updater updater, bool update_global) {
-            if (!achievementDefinitions.ContainsKey(achievementId)) return false;
-            CreateLocalAchievementIfEmpty(achievementId);
-
-            local_achievements[achievementId].Update(updater);
-            if(update_global) UpdateGlobalAchievementFromLocal(achievementId);
-            return true;
+            if(update_global)
+                UpdateGlobalAchievementFromLocal(achievementId);
         }
 
         private void UpdateGlobalAchievementFromLocal(string achievementId) {
@@ -139,7 +118,21 @@ namespace Yurand.Timberborn.Achievements
             CreateAchievementIfEmptyInDictionary(achievementId, local_achievements);
         }
 
-        private void CreateAchievementIfEmptyInDictionary(string achievementId, Dictionary<string, AchievementBase> dictionary) {
+        public AchievementBase GetGlobalAchievement(string achievementId) {
+            CreateGlobalAchievementIfEmpty(achievementId);
+            return global_achievements[achievementId];
+        }
+
+        public AchievementBase GetLocalAchievement(string achievementId) {
+            if (isInGame) {
+                CreateLocalAchievementIfEmpty(achievementId);
+                return local_achievements[achievementId];
+            } else {
+                return null;
+            }
+        }
+
+        private void CreateAchievementIfEmptyInDictionary(string achievementId, IDictionary<string, AchievementBase> dictionary) {
             if (!dictionary.ContainsKey(achievementId)) {
                 var definition = achievementDefinitions[achievementId];
                 dictionary.Add(achievementId, AchievementSerializer.Default(definition));
@@ -185,12 +178,14 @@ namespace Yurand.Timberborn.Achievements
 
             if (singletonLoader.HasSingleton(singletonKey)) {
                 var loader = singletonLoader.GetSingleton(singletonKey);
-                var local_acks_data = loader.Get(localAchievementsKey, new SerializableAchievementsSerializer());
-                foreach(var local_ack in local_acks_data.achievements) {
-                    local_achievements.Add(
-                        local_ack.achievementId,
-                        AchievementSerializer.Deserialize(definitions, local_ack)
-                    );
+                if( loader.Has(localAchievementsKey) ) {
+                    var local_acks_data = loader.Get(localAchievementsKey, new SerializableAchievementsSerializer());
+                    foreach(var local_ack in local_acks_data.achievements) {
+                        local_achievements.Add(
+                            local_ack.achievementId,
+                            AchievementSerializer.Deserialize(definitions, local_ack)
+                        );
+                    }
                 }
             }
         }

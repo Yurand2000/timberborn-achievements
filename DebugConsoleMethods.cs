@@ -145,19 +145,47 @@ namespace Yurand.Timberborn.Achievements
             var completition_str = match.Groups["value"].Value;
 
             bool completed; float completition;
-            if (bool.TryParse(completed_str, out completed) &&
-                float.TryParse(completition_str, out completition)
+            if (!bool.TryParse(completed_str, out completed) ||
+                !float.TryParse(completition_str, out completition)
             ) {
-                if(manager.TryForceUpdateLocalAchievement(achievementId, completed, completition, global_set)) {
-                    console.LogInfo($"Debug - Updated Achievement {achievementId}, set to completed: {completed} with completation state: {completition}");
-                    console.LogInfo("Debug - SetAchievementState Successful");
-                } else {
-                    console.LogInfo("Debug - SetAchievementState Aborted");
-                }
-            } else {
-                console.LogInfo("Debug - SetAchievementState Aborted");
+                console.LogInfo($"Debug - SetAchievementState Aborted, syntax error.");
+                return;
             }
 
+            AchievementDefinitionBase achievementBase;
+            if (!manager.GetAchievementDefinitions().TryGetValue(achievementId, out achievementBase)) {
+                console.LogInfo($"Debug - SetAchievementState Aborted, achievement {achievementId} not found.");
+                return;
+            }
+
+            switch (achievementBase) {
+                case AchievementSimpleDefinition:
+                    manager.UpdateLocalAchievement(achievementId,
+                        new AchievementSimple.Updater() { completed = completed },
+                        false
+                    );
+                    console.LogInfo($"Debug - Updated Achievement {achievementId}, set to completed: {completed}");
+                    break;
+                case AchievementWithCompletitionDefinition:
+                    manager.UpdateLocalAchievement(achievementId,
+                        new AchievementWithCompletition.Updater() { next_state = completition, force_complete = completed },
+                        false
+                    );
+                    console.LogInfo($"Debug - Updated Achievement {achievementId}, set to completed: {completed} with completation state: {completition}");
+                    break;
+                case AchievementWithCompletitionTieredDefinition:
+                    manager.UpdateLocalAchievement(achievementId,
+                        new AchievementWithCompletitionTiered.Updater() { next_state = completition, force_complete = completed },
+                        false
+                    );
+                    console.LogInfo($"Debug - Updated Achievement {achievementId}, set to completed: {completed} with completation state: {completition}");
+                    break;
+                default:
+                    console.LogInfo($"Debug - SetAchievementState Aborted, achievement {achievementId} with type {achievementBase.GetType().Name} not implemented.");
+                    return;
+            }
+
+            console.LogInfo("Debug - SetAchievementState Successful");
         }
     }
 }
