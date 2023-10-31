@@ -11,23 +11,19 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
     [HarmonyPatch]
     public class GameLogic : ILoadableSingleton, ISaveableSingleton
     {
-        private static GameLogic logic;
         private EventBus eventBus;
         private IConsoleWriter console;
         private AchievementManager manager;
-        private BeaverPopulation beaverPopulation;
         private ISingletonLoader singletonLoader;
         private int max_beavers;
         private int current_beavers;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, BeaverPopulation beaverPopulation, ISingletonLoader singletonLoader) {
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, ISingletonLoader singletonLoader) {
             this.eventBus = eventBus;
             this.console = console;
             this.manager = manager;
-            this.beaverPopulation = beaverPopulation;
             this.singletonLoader = singletonLoader;
             this.max_beavers = 0;
             this.current_beavers = 0;
-            logic = this;
         }
 
         public void Load() {
