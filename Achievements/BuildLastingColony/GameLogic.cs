@@ -44,13 +44,13 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
             }
         }
 
-        public const string buildColony5Id = "buildColony5";
-        public const string buildColony10Id = "buildColony10";
-        public const string buildColony15Id = "buildColony15";
-        public const string buildColony20Id = "buildColony20";
-        public const string buildColony30Id = "buildColony30";
-        public const string buildColony50Id = "buildColony50";
-        public const string buildColony100Id = "buildColony100";
+        public const string buildColony5Id = "a001.0.buildColony5";
+        public const string buildColony10Id = "a001.1.buildColony10";
+        public const string buildColony15Id = "a001.2.buildColony15";
+        public const string buildColony20Id = "a001.3.buildColony20";
+        public const string buildColony30Id = "a001.4.buildColony30";
+        public const string buildColony50Id = "a001.5.buildColony50";
+        public const string buildColony100Id = "a001.6.buildColony100";
     }
 
     [HarmonyPatch]
@@ -66,26 +66,26 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
             __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony50Id, buildColony50Image, buildColony50Title, buildColony50Description, 50, true));
             __result.Add(new AchievementWithCompletitionDefinition(GameLogic.buildColony100Id, buildColony100Image, buildColony100Title, buildColony100Description, 100, true));
         }
-        private const string buildColony5Title = "yurand.achievements.buildColony5.title";
-        private const string buildColony5Description = "yurand.achievements.buildColony5.description";
-        private const string buildColony5Image = "yurand.achievements.buildColony5.image";
-        private const string buildColony10Title = "yurand.achievements.buildColony10.title";
-        private const string buildColony10Description = "yurand.achievements.buildColony10.description";
-        private const string buildColony10Image = "yurand.achievements.buildColony10.image";
-        private const string buildColony15Title = "yurand.achievements.buildColony15.title";
-        private const string buildColony15Description = "yurand.achievements.buildColony15.description";
-        private const string buildColony15Image = "yurand.achievements.buildColony15.image";
-        private const string buildColony20Title = "yurand.achievements.buildColony20.title";
-        private const string buildColony20Description = "yurand.achievements.buildColony20.description";
-        private const string buildColony20Image = "yurand.achievements.buildColony20.image";
-        private const string buildColony30Title = "yurand.achievements.buildColony30.title";
-        private const string buildColony30Description = "yurand.achievements.buildColony30.description";
-        private const string buildColony30Image = "yurand.achievements.buildColony30.image";
-        private const string buildColony50Title = "yurand.achievements.buildColony50.title";
-        private const string buildColony50Description = "yurand.achievements.buildColony50.description";
-        private const string buildColony50Image = "yurand.achievements.buildColony50.image";
-        private const string buildColony100Title = "yurand.achievements.buildColony100.title";
-        private const string buildColony100Description = "yurand.achievements.buildColony100.description";
-        private const string buildColony100Image = "yurand.achievements.buildColony100.image";
+        private const string buildColony5Title = "yurand.achievements.a001.0.buildColony5.title";
+        private const string buildColony5Description = "yurand.achievements.a001.0.buildColony5.description";
+        private const string buildColony5Image = "yurand.achievements.a001.0.buildColony5.image";
+        private const string buildColony10Title = "yurand.achievements.a001.1.buildColony10.title";
+        private const string buildColony10Description = "yurand.achievements.a001.1.buildColony10.description";
+        private const string buildColony10Image = "yurand.achievements.a001.1.buildColony10.image";
+        private const string buildColony15Title = "yurand.achievements.a001.2.buildColony15.title";
+        private const string buildColony15Description = "yurand.achievements.a001.2.buildColony15.description";
+        private const string buildColony15Image = "yurand.achievements.a001.2.buildColony15.image";
+        private const string buildColony20Title = "yurand.achievements.a001.3.buildColony20.title";
+        private const string buildColony20Description = "yurand.achievements.a001.3.buildColony20.description";
+        private const string buildColony20Image = "yurand.achievements.a001.3.buildColony20.image";
+        private const string buildColony30Title = "yurand.achievements.a001.4.buildColony30.title";
+        private const string buildColony30Description = "yurand.achievements.a001.4.buildColony30.description";
+        private const string buildColony30Image = "yurand.achievements.a001.4.buildColony30.image";
+        private const string buildColony50Title = "yurand.achievements.a001.5.buildColony50.title";
+        private const string buildColony50Description = "yurand.achievements.a001.5.buildColony50.description";
+        private const string buildColony50Image = "yurand.achievements.a001.5.buildColony50.image";
+        private const string buildColony100Title = "yurand.achievements.a001.6.buildColony100.title";
+        private const string buildColony100Description = "yurand.achievements.a001.6.buildColony100.description";
+        private const string buildColony100Image = "yurand.achievements.a001.6.buildColony100.image";
     }
 }
