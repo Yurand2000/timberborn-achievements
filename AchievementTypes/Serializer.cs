@@ -26,6 +26,11 @@ namespace Yurand.Timberborn.Achievements
             }
         }
         public static AchievementBase Deserialize(IDictionary<string, AchievementDefinitionBase> definitions, SerializableAchievementBase value) {
+            if (!definitions.ContainsKey(value.achievementId)) {
+                PluginEntryPoint.console.LogInfo($"achievement {value.achievementId} not found when deserializing...");
+                return null;
+            }
+
             var definition = definitions[value.achievementId];
             switch (value) {
                 case SerializableAchievementHidden serialized:
@@ -150,6 +155,8 @@ namespace Yurand.Timberborn.Achievements
         
         [XmlElement(ElementName = "AchievementBase")]
         [XmlElement(Type = typeof(SerializableAchievementSimple), ElementName = "AchievementSimple")]
+        [XmlElement(Type = typeof(SerializableAchievementFailable), ElementName = "AchievementFailable")]
+        [XmlElement(Type = typeof(SerializableAchievementHidden), ElementName = "AchievementHidden")]
         [XmlElement(Type = typeof(SerializableAchievementWithCompletition), ElementName = "AchievementWithCompletition")]
         [XmlElement(Type = typeof(SerializableAchievementWithCompletitionTiered), ElementName = "AchievementWithCompletitionTiered")]
         public SerializableAchievementBase[] achievements;

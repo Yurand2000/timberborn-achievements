@@ -54,10 +54,10 @@ namespace Yurand.Timberborn.Achievements
                     if (!achievementDefinitions.ContainsKey(achievement.achievementId)) continue;
                     var definition = achievementDefinitions[achievement.achievementId];
 
-                    global_achievements.Add(
-                        achievement.achievementId,
-                        AchievementSerializer.Deserialize(achievementDefinitions, achievement)
-                    );
+                    var deserialized = AchievementSerializer.Deserialize(achievementDefinitions, achievement);
+
+                    if (deserialized is not null)
+                        global_achievements.Add(achievement.achievementId, deserialized);
                 }
             } catch (System.IO.FileNotFoundException) { }
         }
@@ -193,10 +193,10 @@ namespace Yurand.Timberborn.Achievements
                 if( loader.Has(localAchievementsKey) ) {
                     var local_acks_data = loader.Get(localAchievementsKey, new SerializableAchievementsSerializer());
                     foreach(var local_ack in local_acks_data.achievements) {
-                        local_achievements.Add(
-                            local_ack.achievementId,
-                            AchievementSerializer.Deserialize(definitions, local_ack)
-                        );
+                        var deserialized = AchievementSerializer.Deserialize(definitions, local_ack);
+
+                        if (deserialized is not null)
+                            local_achievements.Add(local_ack.achievementId, deserialized);
                     }
                 }
             }

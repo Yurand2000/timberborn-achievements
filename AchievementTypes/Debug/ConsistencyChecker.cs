@@ -19,6 +19,8 @@ namespace Yurand.Timberborn.Achievements
         private void TestAchievementTypeConsistency() {
             var achievementTypes = FindAllDerivedTypes<AchievementDefinitionBase>();
             var dictionary = new Dictionary<string, AchievementDefinitionBase>();
+
+            var serializables = new List<SerializableAchievementBase>();
             foreach(var type in achievementTypes) {
                 var definitionConstructor = type.GetConstructor(BindingFlags.NonPublic|BindingFlags.Instance, null, new Type[0], null);
                 if (definitionConstructor is null) {
@@ -32,6 +34,8 @@ namespace Yurand.Timberborn.Achievements
                     var achievement = AchievementSerializer.Default(definition);
                     var serialized = AchievementSerializer.Serialize(achievement);
                     var deserialized = AchievementSerializer.Deserialize(dictionary, serialized);
+                    serializables.Add(serialized);
+
                     if (!deserialized.IsSame(achievement)) {
                         console.LogError($"Achivement of type {achievement.GetType().Name} consistency error: cannot be correctly serialized [1]");
                         console.LogError($"{PropertyList(achievement)}\n!=\n{PropertyList(deserialized)}");
@@ -48,6 +52,40 @@ namespace Yurand.Timberborn.Achievements
                 } catch (Exception e) {
                     console.LogError($"Achievement of type {definition.GetType().Name} consistency error: {e}");
                 }
+            }
+
+            try {
+                var mockSerializer = new MockObjectSerializer();
+                var serializableAchievements = new SerializableAchievements(serializables.ToArray());
+                var serializer = new SerializableAchievementsSerializer();
+                serializer.Serialize(serializableAchievements, mockSerializer);
+                var deserialized = serializer.Deserialize(mockSerializer).Value;
+
+                var list1 = serializableAchievements.achievements.ToList(); list1.Sort(new SerializableAchievementComparer());
+                var list2 = deserialized.achievements.ToList(); list2.Sort(new SerializableAchievementComparer());
+                var same = list1.Zip(list2, (a, b) => (a, b))
+                    .All((pair) => { var (a, b) = pair; return a.IsSame(b); });
+                if (!same) {
+                    console.LogError($"Incorrect serialization of achievements array");
+                }
+            } catch (Exception e) {
+                console.LogError($"SerializableAchievements consistency error: {e}");
+            }
+
+            try {
+                var serializableAchievements = new SerializableAchievements(serializables.ToArray());
+                var xml_serialized = XmlHelper.ToString(serializableAchievements);
+                var xml_deserialized = XmlHelper.FromString<SerializableAchievements>(xml_serialized);
+
+                var list1 = serializableAchievements.achievements.ToList(); list1.Sort(new SerializableAchievementComparer());
+                var list2 = xml_deserialized.achievements.ToList(); list2.Sort(new SerializableAchievementComparer());
+                var same = list1.Zip(list2, (a, b) => (a, b))
+                    .All((pair) => { var (a, b) = pair; return a.IsSame(b); });
+                if (!same) {
+                    console.LogError($"Incorrect serialization of achievements array [2]");
+                }
+            } catch (Exception e) {
+                console.LogError($"SerializableAchievements consistency error [2]: {e}");
             }
 
             console.LogInfo("Achievements type consistency check successful");
@@ -83,6 +121,16 @@ namespace Yurand.Timberborn.Achievements
                     type != baseType &&
                     baseType.IsAssignableFrom(type)
                 ).ToList();
+        }
+
+        private class SerializableAchievementComparer : IComparer<SerializableAchievementBase>
+        {
+            public int Compare(SerializableAchievementBase left, SerializableAchievementBase right)
+            {
+                if (left is null) return -1;
+                if (right is null) return 1;
+                return left.achievementId.CompareTo(right.achievementId);
+            }
         }
     }
 }
