@@ -22,7 +22,7 @@ namespace Yurand.Timberborn.Achievements.UI
             this.imageLoader = imageLoader;
         }
 
-        public VisualElement MakeAchievementBox(AchievementBase globalAchievementBase, AchievementBase localAchievementBase)
+        public UIBoxBuilder MakeAchievementBox(AchievementBase globalAchievementBase, AchievementBase localAchievementBase)
         {
             if (globalAchievementBase is null)
                 throw new ArgumentException($"No achievement structure has been supplied.");
@@ -31,18 +31,21 @@ namespace Yurand.Timberborn.Achievements.UI
                 throw new ArgumentException($"Cannot build achievement box for global type {globalAchievementBase.GetType().Name} but local type {localAchievementBase.GetType().Name}");
 
             switch (globalAchievementBase) {
+                case AchievementHidden globalAchievement:
+                    return MakeAchievementHiddenBox(globalAchievement, (AchievementHidden)localAchievementBase);
+                case AchievementFailable globalAchievement:
+                    return MakeAchievementFailableBox(globalAchievement, (AchievementFailable)localAchievementBase);
                 case AchievementSimple globalAchievement:
-                    return MakeAchievementSimpleBox(globalAchievement, (AchievementSimple)localAchievementBase);
+                    return MakeAchievementBaseBox(globalAchievement, localAchievementBase);
                 case AchievementWithCompletition globalAchievement:
                     return MakeAchievementWithCompletitionBox(globalAchievement, (AchievementWithCompletition)localAchievementBase);
-                case AchievementWithCompletitionTiered globalAchievement:
-                    throw new NotImplementedException();
                 default:
-                    throw new ArgumentException($"Cannot build achievement box for type {globalAchievementBase.GetType().Name}");
+                    PluginEntryPoint.console.LogError($"Cannot build achievement box for type {globalAchievementBase.GetType().Name}:{globalAchievementBase.definition.uniqueId}. Switching to default representation...");
+                    return MakeAchievementBaseBox(globalAchievementBase, localAchievementBase);
             }
         }
 
-        private VisualElement MakeAchievementBoxBase(bool completed, string achievementImageFile, Action<VisualElementBuilder> right_box_builder) {
+        private UIBoxBuilder MakeAchievementBox(bool completed, string achievementImageFile, Action<VisualElementBuilder> right_box_builder) {
             var box_wrapper = uiBuilder.CreateBoxBuilder()
                 .SetWidth(new Length(700, Pixel))
                 .ModifyScrollView(view => view
@@ -72,20 +75,41 @@ namespace Yurand.Timberborn.Achievements.UI
             });
 
             if (!completed)
-                BuildAchievementLockedOverlay(box_wrapper);
+                BuildAchievementOverlay(box_wrapper, Color.black, 0.5f);
 
-            return box_wrapper.Build();
+            return box_wrapper;
         }
 
-        private VisualElement MakeAchievementSimpleBox(AchievementSimple globalAchievement, AchievementSimple localAchievement) {
-            return MakeAchievementBoxBase(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
+        private UIBoxBuilder MakeAchievementBaseBox(AchievementBase globalAchievement, AchievementBase localAchievement) {
+            return MakeAchievementBox(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
                 BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
                 BuildAchievementDescription(builder, globalAchievement.definition.localizedDescription);
             });
         }
+
+        private UIBoxBuilder MakeAchievementFailableBox(AchievementFailable globalAchievement, AchievementFailable localAchievement) { 
+            if (localAchievement?.failed ?? false) {
+                var builder = MakeAchievementBox(true, globalAchievement.definition.imageFile, builder => {
+                    BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
+                    BuildAchievementDescription(builder, globalAchievement.definition.localizedDescription);
+                });
+
+                BuildAchievementOverlay(builder, Color.red, 0.5f);
+                return builder;
+            } else {
+                return MakeAchievementBaseBox(globalAchievement, localAchievement);
+            }
+        }
         
-        private VisualElement MakeAchievementWithCompletitionBox(AchievementWithCompletition globalAchievement, AchievementWithCompletition localAchievement) {
-            return MakeAchievementBoxBase(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
+        private UIBoxBuilder MakeAchievementHiddenBox(AchievementHidden globalAchievement, AchievementHidden localAchievement) {
+            if (globalAchievement.completed)
+                return MakeAchievementBaseBox(globalAchievement, localAchievement);
+            else
+                return null;
+        }
+        
+        private UIBoxBuilder MakeAchievementWithCompletitionBox(AchievementWithCompletition globalAchievement, AchievementWithCompletition localAchievement) {
+            return MakeAchievementBox(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
                 BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
                 BuildAchievementCompletitionBar(builder,
                     localAchievement?.current_state ?? 0f,
@@ -230,11 +254,11 @@ namespace Yurand.Timberborn.Achievements.UI
             );
         }
 
-        private void BuildAchievementLockedOverlay(UIBoxBuilder box_wrapper) {
+        private void BuildAchievementOverlay(UIBoxBuilder box_wrapper, Color color, float opacity) {
             box_wrapper.AddComponent(
                 builder => builder.SetStyle(style => {
-                    style.backgroundColor = new StyleColor(Color.black);
-                    style.opacity = new StyleFloat(0.25f);
+                    style.backgroundColor = color;
+                    style.opacity = opacity;
                     style.position = Position.Absolute;
                     style.top = 0; style.left = 0;
                     style.right = 0; style.bottom = 0;

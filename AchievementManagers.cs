@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using TimberApi.ConsoleSystem;
+using Timberborn.BaseComponentSystem;
 using Timberborn.Persistence;
 using Timberborn.SingletonSystem;
+using UnityEditor.VersionControl;
+using UnityEngine;
 using UnityEngine.AI;
 
 namespace Yurand.Timberborn.Achievements
 {
-    public class AchievementManager : ILoadableSingleton, IUnloadableSingleton
+    public partial class AchievementManager : ILoadableSingleton, IUnloadableSingleton
     {
         private const string achievementFile = "achievements.xml";
 
@@ -25,11 +30,15 @@ namespace Yurand.Timberborn.Achievements
 
         public void Load() {
             AddAchievementDefinitions(LoadDefinitions());
+            if (PluginEntryPoint.debugLogging)
+                AddAchievementDefinitions(LoadDebugDefinitions());
+
             LoadGlobal();
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Correctly loaded achievements manager.");
                 console.LogInfo($"Loaded {achievementDefinitions.Count} achievements");
+                TestAchievementTypeConsistency();
             }
         }
 
@@ -82,7 +91,7 @@ namespace Yurand.Timberborn.Achievements
         public void AddAchievementDefinition(AchievementDefinitionBase definition) {
             achievementDefinitions.Add(definition.uniqueId, definition);
         }
-        
+
         public void AddAchievementDefinitions(IEnumerable<AchievementDefinitionBase> definitions) {
             foreach(var definition in definitions) {
                 achievementDefinitions.Add(definition.uniqueId, definition);
@@ -152,7 +161,7 @@ namespace Yurand.Timberborn.Achievements
         }
     }
 
-    public class AchievementManagerInGame : ILoadableSingleton, ISaveableSingleton, IUnloadableSingleton
+    public partial class AchievementManagerInGame : ILoadableSingleton, ISaveableSingleton, IUnloadableSingleton
     {
         private AchievementManager manager;
         private IConsoleWriter console;
@@ -166,7 +175,10 @@ namespace Yurand.Timberborn.Achievements
 
         public void Load() {
             TryLoadLocalAchievements();
-            manager.SetInGame(true, local_achievements);
+            manager.SetInGame(true, local_achievements);            
+            if (PluginEntryPoint.debugLogging) {
+                SetDebugAchievementGlobalState();
+            }
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Correctly loaded achievements manager (ingame).");

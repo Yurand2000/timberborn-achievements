@@ -67,7 +67,8 @@ namespace Yurand.Timberborn.Achievements.UI
                 var local_achievement = achievementManager.GetLocalAchievement(key);
                 
                 var achievementBox = achievementBoxFactory.MakeAchievementBox(global_achievement, local_achievement);
-                panelBuilder.AddComponent(achievementBox);
+                if (achievementBox is not null)
+                    panelBuilder.AddComponent(achievementBox.Build());
             }
 
             VisualElement root = panelBuilder
