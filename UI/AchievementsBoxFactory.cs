@@ -165,7 +165,7 @@ namespace Yurand.Timberborn.Achievements.UI
 
         private void BuildAchievementTitle(VisualElementBuilder text_box, string achievementName) {
             text_box.AddPreset(factory =>
-                factory.Labels().DefaultBig(
+                factory.Labels().DefaultHeader(
                     locKey: achievementName,
                     builder: builder => builder.SetStyle(
                         style => {

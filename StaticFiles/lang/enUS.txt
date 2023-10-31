@@ -63,3 +63,22 @@ yurand.achievements.a002.4.beaverPopulation999.image,Assets/Resources/A002.4.png
 yurand.achievements.a049.itsASoccerTeam.title,It’s a soccer team!,
 yurand.achievements.a049.itsASoccerTeam.description,Have 11 baby beavers born,
 yurand.achievements.a049.itsASoccerTeam.image,Assets/Resources/A049.png,
+
+
+
+
+yurand.achievements.a058.0.holydays.halloween.title,SpoOOOOooky,
+yurand.achievements.a058.0.holydays.halloween.description,Log on and play on Halloween!,
+yurand.achievements.a058.0.holydays.halloween.image,Assets/Resources/A058.0.png,
+
+yurand.achievements.a058.1.holydays.dayOfTheDead.title,Dias de los muertes,
+yurand.achievements.a058.1.holydays.dayOfTheDead.description,Log on and play on the Day of the Dead,
+yurand.achievements.a058.1.holydays.dayOfTheDead.image,Assets/Resources/A058.1.png,
+
+yurand.achievements.a058.2.holydays.christmas.title,Merry Xmas,
+yurand.achievements.a058.2.holydays.christmas.description,Log on and play on Christmas,
+yurand.achievements.a058.2.holydays.christmas.image,Assets/Resources/A058.2.png,
+
+yurand.achievements.a058.3.holydays.epiphany.title,Three Kings,
+yurand.achievements.a058.3.holydays.epiphany.description,Log on and play on Epiphany,
+yurand.achievements.a058.3.holydays.epiphany.image,Assets/Resources/A058.3.png,
