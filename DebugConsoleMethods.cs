@@ -16,6 +16,7 @@ namespace Yurand.Timberborn.Achievements
         private AchievementManager manager;
         private SetAchievementStateMenu setAchievementStateMenu;
         private IConsoleWriter console;
+        private static List<ConsoleMethod> debugMethods;
         public DebugConsoleMethods(
             AchievementManager manager, 
             SetAchievementStateMenu setAchievementStateMenu,
@@ -48,6 +49,14 @@ namespace Yurand.Timberborn.Achievements
             resetAchievementsStateDelegate = ResetAchievementsState;
             resetAchievementsStateGlobalDelegate = ResetAchievementsGlobalState;
             printAvailableAchievementsDelegate = PrintAvailableAchievements;
+
+            debugMethods = new List<ConsoleMethod> {
+                ConsoleMethod.Create("[Yurand] Set Achievement State", setAchievementStateDelegate),
+                ConsoleMethod.Create("[Yurand] Set Achievement State Global", setAchievementStateGlobalDelegate),
+                ConsoleMethod.Create("[Yurand] Reset Achievements State", resetAchievementsStateDelegate),
+                ConsoleMethod.Create("[Yurand] Reset Achievements State Global", resetAchievementsStateGlobalDelegate),
+                ConsoleMethod.Create("[Yurand] Print Available Achievements", printAvailableAchievementsDelegate)
+            };
         }
 
         private void SetAchievementState() {
@@ -78,11 +87,9 @@ namespace Yurand.Timberborn.Achievements
         }
         
         private static void ConsolePanelLoadConsoleMethodsPostfix(ref ConsolePanel __instance, ref List<ConsoleMethod> ____consoleMethods) {
-            ____consoleMethods.Add(new ConsoleMethod("[Yurand] Set Achievement State", setAchievementStateDelegate));
-            ____consoleMethods.Add(new ConsoleMethod("[Yurand] Set Achievement State Global", setAchievementStateGlobalDelegate));
-            ____consoleMethods.Add(new ConsoleMethod("[Yurand] Reset Achievements State", resetAchievementsStateDelegate));
-            ____consoleMethods.Add(new ConsoleMethod("[Yurand] Reset Achievements State Global", resetAchievementsStateGlobalDelegate));
-            ____consoleMethods.Add(new ConsoleMethod("[Yurand] Print Available Achievements", printAvailableAchievementsDelegate));
+            foreach(var method in debugMethods) {
+                ____consoleMethods.Add(method);
+            }
         }
     }
     

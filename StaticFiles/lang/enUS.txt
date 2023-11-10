@@ -59,6 +59,11 @@ yurand.achievements.a002.4.beaverPopulation999.description,Reach a population of
 yurand.achievements.a002.4.beaverPopulation999.image,Assets/Resources/A002.4.png,
 
 
+yurand.achievements.a010.noCampingAllowedId.title,No camping allowed
+yurand.achievements.a010.noCampingAllowedId.description,Create 3 campfires
+yurand.achievements.a010.noCampingAllowedId.image,Assets/Resources/A010.png
+
+
 
 yurand.achievements.a049.itsASoccerTeam.title,It’s a soccer team!,
 yurand.achievements.a049.itsASoccerTeam.description,Have 11 baby beavers born,

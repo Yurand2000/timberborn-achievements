@@ -15,7 +15,10 @@ namespace Yurand.Timberborn.Achievements
     [Configurator(SceneEntrypoint.MainMenu)]
     public class Patches : IConfigurator
     {
+        private static bool loaded = false;
         public void Configure(IContainerDefinition containerDefinition) {
+            if (loaded) return;
+
             var harmony = PluginEntryPoint.harmony;
             harmony.Patch(
                 AccessTools.Method(mainMenuPanelClass + ":GetPanel"),
@@ -25,9 +28,11 @@ namespace Yurand.Timberborn.Achievements
             harmony.Patch(
                 AccessTools.Method(ingameOptionsPanelClass + ":GetPanel"),
                 postfix: new HarmonyMethod(AccessTools.Method(GetType(), nameof(IngameMenuPanelPostfix)))
-            );            
+            );
+
+            loaded = true;
         }
-        
+
         private static void MainMenuPanelPostfix(ref VisualElement __result)
         {
             var loc = DependencyContainer.GetInstance<ILoc>();
@@ -38,7 +43,7 @@ namespace Yurand.Timberborn.Achievements
             button.clicked += AchievementsMenu.OpenOptionsDelegate;
             root.Insert(6, button);
         }
-        
+
         private static void IngameMenuPanelPostfix(ref VisualElement __result)
         {
             var loc = DependencyContainer.GetInstance<ILoc>();
