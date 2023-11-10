@@ -9,18 +9,14 @@ namespace Yurand.Timberborn.Achievements.Holydays
 {
     public class GameLogic : ILoadableSingleton
     {
-        private EventBus eventBus;
         private IConsoleWriter console;
         private AchievementManager manager;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager) {
-            this.eventBus = eventBus;
+        public GameLogic(IConsoleWriter console, AchievementManager manager) {
             this.console = console;
             this.manager = manager;
         }
 
         public void Load() {
-            eventBus.Register(this);
-
             var today = System.DateTime.Now;
             if (today.Day == 31 && today.Month == 10) {
                 manager.UpdateLocalAchievement(halloweenId, new AchievementHidden.Updater{ completed = true });

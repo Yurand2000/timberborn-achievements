@@ -16,7 +16,8 @@ namespace Yurand.Timberborn.Achievements.ExampleAchievement
             this.manager = manager;
         }
 
-        public void Load() {
+        public void Load() {            
+            eventBus.Register(this);            
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("ExampleAchievement logic loaded.");
             }
