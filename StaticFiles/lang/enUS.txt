@@ -2,6 +2,9 @@ ID,Text,Comment
 yurand.achievements.menu_option,Achievements,
 yurand.achievements.panel_header,Achievements,
 
+yurand.achievements.achievementCompleted.info,Congratulations! You have unlocked a new achievement: ,
+yurand.achievements.achievementCompleted.button,Achievements,
+
 yurand.achievements.backgroundImage,Assets/Resources/background.png,
 
 yurand.achievements.a001.0.buildColony5.title,Babysteps,

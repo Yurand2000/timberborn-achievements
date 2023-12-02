@@ -11,6 +11,7 @@ using Timberborn.SingletonSystem;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.AI;
+using Yurand.Timberborn.Achievements.UI;
 
 namespace Yurand.Timberborn.Achievements
 {
@@ -18,14 +19,16 @@ namespace Yurand.Timberborn.Achievements
     {
         private const string achievementFile = "achievements.xml";
 
-        private IConsoleWriter console;
+        private readonly IConsoleWriter console;
+        private readonly EventBus eventBus;
         private Dictionary<string, AchievementDefinitionBase> achievementDefinitions = new Dictionary<string, AchievementDefinitionBase>();
         private Dictionary<string, AchievementBase> global_achievements = new Dictionary<string, AchievementBase>();
         private Dictionary<string, AchievementBase> local_achievements = null;
         private bool isInGame = false;
 
-        public AchievementManager(IConsoleWriter console) {
+        public AchievementManager(IConsoleWriter console, EventBus eventBus) {
             this.console = console;
+            this.eventBus = eventBus;
         }
 
         public void Load() {
@@ -108,7 +111,13 @@ namespace Yurand.Timberborn.Achievements
 
         private void UpdateGlobalAchievementFromLocal(string achievementId) {
             CreateGlobalAchievementIfEmpty(achievementId);
+            var was_completed = global_achievements[achievementId].completed;
             global_achievements[achievementId].UpdateFromLocal(local_achievements[achievementId]);
+
+            if (!was_completed && global_achievements[achievementId].completed) {
+                var definition = achievementDefinitions[achievementId];
+                eventBus.Post(new AchievementCompletedEvent(definition.localizedTitle));
+            }
         }
 
         public void ResetLocalAchievements() {
