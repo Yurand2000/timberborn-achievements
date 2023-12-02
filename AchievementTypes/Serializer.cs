@@ -88,6 +88,9 @@ namespace Yurand.Timberborn.Achievements
     public class SerializableAchievementSerializer : IObjectSerializer<SerializableAchievementBase>
     {
         public Obsoletable<SerializableAchievementBase> Deserialize(IObjectLoader objectLoader) {
+            if ( !objectLoader.Has(achievementTypeKey) )
+                return new Obsoletable<SerializableAchievementBase>();
+
             var type = objectLoader.Get(achievementTypeKey);
             var baseAch = DeserializeBase(objectLoader);
             switch (type) {
@@ -102,7 +105,7 @@ namespace Yurand.Timberborn.Achievements
                 case nameof(SerializableAchievementWithCompletitionTiered):
                     return new SerializableAchievementWithCompletitionTiered(baseAch, objectLoader.Get(currentStateKey));
                 default:
-                    throw new ArgumentException($"Cannot serialize achievement of type {type}");
+                    throw new ArgumentException($"Cannot deserialize achievement of type {type}");
             }
         }
 
@@ -170,6 +173,9 @@ namespace Yurand.Timberborn.Achievements
     {
         public Obsoletable<SerializableAchievements> Deserialize(IObjectLoader objectLoader)
         {
+            if ( !objectLoader.Has(achievementsListKey) )
+                return new Obsoletable<SerializableAchievements>();
+
             return new SerializableAchievements(
                 objectLoader.Get(achievementsListKey, new SerializableAchievementSerializer()).ToArray()
             );

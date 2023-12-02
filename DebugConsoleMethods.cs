@@ -115,8 +115,8 @@ namespace Yurand.Timberborn.Achievements
 
             root = visualElementLoader.LoadVisualElement("Core/InputBox");
             root.Q<TextField>("Input").maxLength = 300;
-            root.Q<Button>("ConfirmButton").RegisterCallback<ClickEvent>(delegate { OnUIConfirmed(); });
-            root.Q<Button>("CancelButton").RegisterCallback<ClickEvent>(delegate { OnUICancelled(); });
+            root.Q<Button>("ConfirmButton").clicked += delegate { OnUIConfirmed(); };
+            root.Q<Button>("CancelButton").clicked += delegate { OnUICancelled(); };
             root.Q<Label>("Message").text = "SetAchievementState function. Format:\n'<uniqueId>:<completed=true|false>:<completation_state:int|float>'\nSet to empty to abort.";
 
             if (PluginEntryPoint.debugLogging) {
