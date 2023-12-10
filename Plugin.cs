@@ -15,7 +15,7 @@ namespace Yurand.Timberborn.Achievements
         public static Harmony harmony;
         public static IConsoleWriter console;
         public static string directory;
-        public const bool debugLogging = true;
+        public const bool debugLogging = false;
         public void Entry(IMod mod, IConsoleWriter consoleWriter)
         {
             harmony = new Harmony("Yurand.Timberborn.Achievements");

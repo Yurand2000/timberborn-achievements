@@ -7,6 +7,8 @@ yurand.achievements.achievementCompleted.button,Achievements,
 
 yurand.achievements.backgroundImage,Assets/Resources/background.png,
 
+yurand.achievements.comment001,Achievements Start,
+
 yurand.achievements.a001.0.buildColony5.title,Babysteps,
 yurand.achievements.a001.0.buildColony5.description,Build a lasting beaver colony and survive for at least 5 cycles.,
 yurand.achievements.a001.0.buildColony5.image,Assets/Resources/A001.0.png,
@@ -31,11 +33,9 @@ yurand.achievements.a001.5.buildColony50.title,This game is meditation for you,
 yurand.achievements.a001.5.buildColony50.description,Build a lasting beaver colony and survive for at least 50 cycles.,
 yurand.achievements.a001.5.buildColony50.image,Assets/Resources/A001.5.png,
 
-yurand.achievements.a001.6.buildColony100.title,You are timber born!,
+yurand.achievements.a001.6.buildColony100.title,You are Timberborn!,
 yurand.achievements.a001.6.buildColony100.description,Build a lasting beaver colony and survive for at least 100 cycles.,
 yurand.achievements.a001.6.buildColony100.image,Assets/Resources/A001.6.png,
-
-
 
 yurand.achievements.a002.-1.beaverPopulation50.title,It’s an hamlet,
 yurand.achievements.a002.-1.beaverPopulation50.description,Reach a population of at least 50 living beavers. Bots do not count towards this goal.,
@@ -61,32 +61,50 @@ yurand.achievements.a002.4.beaverPopulation999.title,Timberopolis,
 yurand.achievements.a002.4.beaverPopulation999.description,Reach a population of at least 999 living beavers. Bots do not count towards this goal.,
 yurand.achievements.a002.4.beaverPopulation999.image,Assets/Resources/A002.4.png,
 
+yurand.achievements.a010.noCampingAllowed.title,No loitering!,
+yurand.achievements.a010.noCampingAllowed.description,Build 3 campfires,
+yurand.achievements.a010.noCampingAllowed.image,Assets/Resources/A010.png,
 
-yurand.achievements.a010.noCampingAllowedId.title,No camping allowed
-yurand.achievements.a010.noCampingAllowedId.description,Create 3 campfires
-yurand.achievements.a010.noCampingAllowedId.image,Assets/Resources/A010.png
-
-
+yurand.achievements.comment100,Invisible Achievements,
 
 yurand.achievements.a049.itsASoccerTeam.title,It’s a soccer team!,
 yurand.achievements.a049.itsASoccerTeam.description,Have 11 baby beavers born,
 yurand.achievements.a049.itsASoccerTeam.image,Assets/Resources/A049.png,
 
+yurand.achievements.comment200,Seasonal Achievements - Invisible,
 
+yurand.achievements.a058.0.halloween.title,SpoOOOOooky,
+yurand.achievements.a058.0.halloween.description,Log on and play on Halloween! (31 Oct),
+yurand.achievements.a058.0.halloween.image,Assets/Resources/A058.0.png,
 
+yurand.achievements.a058.1.dayOfTheDead.title,Dias de los muertes,
+yurand.achievements.a058.1.dayOfTheDead.description,Log on and play on the Day of the Dead (01 Nov),
+yurand.achievements.a058.1.dayOfTheDead.image,Assets/Resources/A058.1.png,
 
-yurand.achievements.a058.0.holydays.halloween.title,SpoOOOOooky,
-yurand.achievements.a058.0.holydays.halloween.description,Log on and play on Halloween!,
-yurand.achievements.a058.0.holydays.halloween.image,Assets/Resources/A058.0.png,
+yurand.achievements.a058.2.christmas.title,Merry Xmas,
+yurand.achievements.a058.2.christmas.description,Log on and play on Christmas (24 Dec),
+yurand.achievements.a058.2.christmas.image,Assets/Resources/A058.2.png,
 
-yurand.achievements.a058.1.holydays.dayOfTheDead.title,Dias de los muertes,
-yurand.achievements.a058.1.holydays.dayOfTheDead.description,Log on and play on the Day of the Dead,
-yurand.achievements.a058.1.holydays.dayOfTheDead.image,Assets/Resources/A058.1.png,
+yurand.achievements.a058.3.epiphany.title,Three Kings,
+yurand.achievements.a058.3.epiphany.description,Log on and play on Epiphany (06 Jan),
+yurand.achievements.a058.3.epiphany.image,Assets/Resources/A058.3.png,
 
-yurand.achievements.a058.2.holydays.christmas.title,Merry Xmas,
-yurand.achievements.a058.2.holydays.christmas.description,Log on and play on Christmas,
-yurand.achievements.a058.2.holydays.christmas.image,Assets/Resources/A058.2.png,
+yurand.achievements.a058.4.easter.title,Easter Beaver,
+yurand.achievements.a058.4.easter.description,Log on and play on Spring Equinox (20 Mar),
+yurand.achievements.a058.4.easter.image,Assets/Resources/A058.4.png,
 
-yurand.achievements.a058.3.holydays.epiphany.title,Three Kings,
-yurand.achievements.a058.3.holydays.epiphany.description,Log on and play on Epiphany,
-yurand.achievements.a058.3.holydays.epiphany.image,Assets/Resources/A058.3.png,
+yurand.achievements.a058.5.aid.title,Aid all beaver fodder,
+yurand.achievements.a058.5.aid.description,Log on and play on (23 Apr 2023),
+yurand.achievements.a058.5.aid.image,Assets/Resources/A058.5.png,
+
+yurand.achievements.a058.6.joker.title,Don't be so serious,
+yurand.achievements.a058.6.joker.description,Log on and play on Carnival start (11 Nov),
+yurand.achievements.a058.6.joker.image,Assets/Resources/A058.6.png,
+
+yurand.achievements.a058.7.beaver.title,International beaver day,
+yurand.achievements.a058.7.beaver.description,Log on and play as beaver (7 Apr),
+yurand.achievements.a058.7.beaver.image,Assets/Resources/A058.7.png,
+
+yurand.achievements.a058.8.music.title,Donauinsel sing and swim,
+yurand.achievements.a058.8.music.description,Log on and sing and swim (21 Jun),
+yurand.achievements.a058.8.music.image,Assets/Resources/A058.8.png,

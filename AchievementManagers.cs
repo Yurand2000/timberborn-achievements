@@ -18,6 +18,7 @@ namespace Yurand.Timberborn.Achievements
     public partial class AchievementManager : ILoadableSingleton, IUnloadableSingleton
     {
         private const string achievementFile = "achievements.xml";
+        public const bool loadTestAchievements = false;
 
         private readonly IConsoleWriter console;
         private readonly EventBus eventBus;
@@ -33,7 +34,7 @@ namespace Yurand.Timberborn.Achievements
 
         public void Load() {
             AddAchievementDefinitions(LoadDefinitions());
-            if (PluginEntryPoint.debugLogging)
+            if (loadTestAchievements)
                 AddAchievementDefinitions(LoadDebugDefinitions());
 
             LoadGlobal();
@@ -185,7 +186,7 @@ namespace Yurand.Timberborn.Achievements
         public void Load() {
             TryLoadLocalAchievements();
             manager.SetInGame(true, local_achievements);            
-            if (PluginEntryPoint.debugLogging) {
+            if (AchievementManager.loadTestAchievements) {
                 SetDebugAchievementGlobalState();
             }
 

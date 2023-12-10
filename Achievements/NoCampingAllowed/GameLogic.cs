@@ -67,8 +67,8 @@ namespace Yurand.Timberborn.Achievements.NoCampingAllowed
         public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
             __result.Add(new AchievementSimpleDefinition(GameLogic.noCampingAllowedId, noCampingAllowedIdImage, noCampingAllowedIdTitle, noCampingAllowedIdDescription));
         }
-        private const string noCampingAllowedIdTitle = "yurand.achievements.a010.noCampingAllowedId.title";
-        private const string noCampingAllowedIdDescription = "yurand.achievements.a010.noCampingAllowedId.description";
-        private const string noCampingAllowedIdImage = "yurand.achievements.a010.noCampingAllowedId.image";
+        private const string noCampingAllowedIdTitle = "yurand.achievements.a010.noCampingAllowed.title";
+        private const string noCampingAllowedIdDescription = "yurand.achievements.a010.noCampingAllowed.description";
+        private const string noCampingAllowedIdImage = "yurand.achievements.a010.noCampingAllowed.image";
     }
 }

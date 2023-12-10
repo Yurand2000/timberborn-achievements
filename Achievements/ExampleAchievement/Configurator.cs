@@ -9,7 +9,8 @@ namespace Yurand.Timberborn.Achievements.ExampleAchievement
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            containerDefinition.Bind<GameLogic>().AsSingleton();
+            if (AchievementManager.loadTestAchievements)
+                containerDefinition.Bind<GameLogic>().AsSingleton();
         }
     }
 }
