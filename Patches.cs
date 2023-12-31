@@ -6,6 +6,7 @@ using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.DependencyContainerSystem;
 using TimberApi.SceneSystem;
+using TimberApi.UiBuilderSystem.CustomElements;
 using Timberborn.Localization;
 using UnityEngine.UIElements;
 using Yurand.Timberborn.Achievements.UI;
@@ -37,7 +38,7 @@ namespace Yurand.Timberborn.Achievements
         {
             var loc = DependencyContainer.GetInstance<ILoc>();
             VisualElement root = __result.Query("MainMenuPanel");
-            Button button = new Button();
+            Button button = new LocalizableButton();
             button.AddToClassList("menu-button");
             button.text = loc.T(achievementsPanelMenuOptionLoc);
             button.clicked += AchievementsMenu.OpenOptionsDelegate;
@@ -48,7 +49,7 @@ namespace Yurand.Timberborn.Achievements
         {
             var loc = DependencyContainer.GetInstance<ILoc>();
             VisualElement root = __result.Query("OptionsBox");
-            Button button = new Button();
+            Button button = new LocalizableButton();
             button.AddToClassList("menu-button");
             button.text = loc.T(achievementsPanelMenuOptionLoc);
             button.clicked += AchievementsMenu.OpenOptionsDelegate;
