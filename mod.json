@@ -1,14 +1,9 @@
 {
   "Name": "Achievements",
-  "Version": "1.0.0",
+  "Version": "1.0.1",
   "UniqueId": "Yurand.Timberborn.Achievements",
   "MinimumApiVersion": "0.6.0",
   "MinimumGameVersion": "0.5.0.0",
   "EntryDll": "Yurand.Timberborn.Achievements.dll",
-  "Assets": [
-    {
-      "Prefix": "AchievementsBase",
-      "Scenes": ["All"]
-    }
-  ]
+  "Assets": []
 }

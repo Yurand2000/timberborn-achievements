@@ -36,7 +36,11 @@ namespace Yurand.Timberborn.Achievements.NoCampingAllowed
 
             if (current_campfires >= 3) {
                 manager.UpdateLocalAchievement(noCampingAllowedId, new AchievementSimple.Updater{ completed = true });
-                console.LogInfo($"Completed noCampingAllowed achievement");
+                eventBus.Unregister(this);
+
+                if (PluginEntryPoint.debugLogging) {
+                    console.LogInfo($"Completed noCampingAllowed achievement");
+                }
             }
         }
         

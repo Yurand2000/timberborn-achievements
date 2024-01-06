@@ -33,6 +33,7 @@ namespace Yurand.Timberborn.Achievements.ItsASoccerTeam
 
                 if (current_children >= 11) {
                     manager.UpdateLocalAchievement(itsASoccerTeamId, new AchievementHidden.Updater{ completed = true });
+                    eventBus.Unregister(this);
 
                     if (PluginEntryPoint.debugLogging) {
                         console.LogInfo("Completed itsASoccerTeam achievement.");
