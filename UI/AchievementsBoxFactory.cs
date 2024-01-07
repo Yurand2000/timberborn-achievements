@@ -1,6 +1,7 @@
 using System;
 using TimberApi.AssetSystem;
 using TimberApi.AssetSystem.Exceptions;
+using TimberApi.ModSystem;
 using TimberApi.UiBuilderSystem;
 using TimberApi.UiBuilderSystem.ElementSystem;
 using Timberborn.Localization;
@@ -45,7 +46,7 @@ namespace Yurand.Timberborn.Achievements.UI
             }
         }
 
-        private UIBoxBuilder MakeAchievementBox(bool completed, string achievementImageFile, Action<VisualElementBuilder> right_box_builder) {
+        private UIBoxBuilder MakeAchievementBox(bool completed, AchievementDefinitionBase definition, Action<VisualElementBuilder> right_box_builder) {
             var box_wrapper = uiBuilder.CreateBoxBuilder()
                 .SetWidth(new Length(700, Pixel))
                 .ModifyScrollView(view => view
@@ -65,7 +66,7 @@ namespace Yurand.Timberborn.Achievements.UI
                     .SetFlexWrap(Wrap.Wrap);
 
                 box_builder.AddComponent(builder => {
-                    BuildAchievementImage(builder, achievementImageFile);
+                    BuildAchievementImage(builder, definition.imageFile, definition.imageDefaultDirectory, definition.mod);
                 });
 
                 box_builder.AddComponent(builder => {
@@ -81,7 +82,7 @@ namespace Yurand.Timberborn.Achievements.UI
         }
 
         private UIBoxBuilder MakeAchievementBaseBox(AchievementBase globalAchievement, AchievementBase localAchievement) {
-            return MakeAchievementBox(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
+            return MakeAchievementBox(globalAchievement.completed, globalAchievement.definition, builder => {
                 BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
                 BuildAchievementDescription(builder, globalAchievement.definition.localizedDescription);
             });
@@ -89,7 +90,7 @@ namespace Yurand.Timberborn.Achievements.UI
 
         private UIBoxBuilder MakeAchievementFailableBox(AchievementFailable globalAchievement, AchievementFailable localAchievement) { 
             if (localAchievement?.failed ?? false) {
-                var builder = MakeAchievementBox(true, globalAchievement.definition.imageFile, builder => {
+                var builder = MakeAchievementBox(true, globalAchievement.definition, builder => {
                     BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
                     BuildAchievementDescription(builder, globalAchievement.definition.localizedDescription);
                 });
@@ -109,7 +110,7 @@ namespace Yurand.Timberborn.Achievements.UI
         }
         
         private UIBoxBuilder MakeAchievementWithCompletitionBox(AchievementWithCompletition globalAchievement, AchievementWithCompletition localAchievement) {
-            return MakeAchievementBox(globalAchievement.completed, globalAchievement.definition.imageFile, builder => {
+            return MakeAchievementBox(globalAchievement.completed, globalAchievement.definition, builder => {
                 BuildAchievementTitle(builder, globalAchievement.definition.localizedTitle);
                 BuildAchievementCompletitionBar(builder,
                     localAchievement?.current_state ?? 0f,
@@ -121,7 +122,7 @@ namespace Yurand.Timberborn.Achievements.UI
             });
         }
 
-        private void BuildAchievementImage(VisualElementBuilder builder, string achievementImagePath)
+        private void BuildAchievementImage(VisualElementBuilder builder, string achievementImagePath, bool defaultPath, IMod mod)
         {
             const float imageSize = 128f;
 
@@ -139,7 +140,7 @@ namespace Yurand.Timberborn.Achievements.UI
                             builder => {
                                 builder.AddComponent(new Image
                                 {
-                                    image = imageLoader.GetTexture(achievementBackgroundImage),
+                                    image = imageLoader.GetTexture(achievementBackgroundImage, defaultPath, mod),
                                     style = { width = imageSize, height = imageSize }
                                 });
                             }
@@ -153,7 +154,7 @@ namespace Yurand.Timberborn.Achievements.UI
                             builder => {
                                 builder.AddComponent(new Image
                                 {
-                                    image = imageLoader.GetTexture(achievementImagePath),
+                                    image = imageLoader.GetTexture(achievementImagePath, defaultPath, mod),
                                     style = { width = imageSize, height = imageSize }
                                 });
                             }

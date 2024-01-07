@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TimberApi.ModSystem;
 using Timberborn.Common;
 
 namespace Yurand.Timberborn.Achievements
@@ -9,9 +10,8 @@ namespace Yurand.Timberborn.Achievements
     public class AchievementWithCompletitionTieredDefinition : AchievementDefinitionBase {
         public IReadOnlyList<float> max_completition_tiers { get; private set; }
         public bool as_integer { get; private set; }
-        public AchievementWithCompletitionTieredDefinition(string uniqueId, string imageFile, string localizedTitle, string localizedDescription, List<float> max_completition_tiers, bool as_integer)
-            :base(uniqueId, imageFile, localizedTitle, localizedDescription)
-        {
+        
+        private void Constructor(List<float> max_completition_tiers, bool as_integer) {
             if ( max_completition_tiers.Count == 0 ) throw new ArgumentException("Max Completition List must not be empty.");
 
             var is_strict_sorted = max_completition_tiers
@@ -21,6 +21,17 @@ namespace Yurand.Timberborn.Achievements
 
             this.max_completition_tiers = max_completition_tiers;
             this.as_integer = as_integer;
+        }
+
+        public AchievementWithCompletitionTieredDefinition(string uniqueId, string imageFile, string localizedTitle, string localizedDescription, List<float> max_completition_tiers, bool as_integer)
+            :base(uniqueId, imageFile, localizedTitle, localizedDescription)
+        {
+            Constructor(max_completition_tiers, as_integer);
+        }
+        public AchievementWithCompletitionTieredDefinition(string uniqueId, string imageFile, bool imageFromDefaultDirectory, string localizedTitle, string localizedDescription, IMod mod, List<float> max_completition_tiers, bool as_integer)
+            :base(uniqueId, imageFile, imageFromDefaultDirectory, localizedTitle, localizedDescription, mod)
+        {
+            Constructor(max_completition_tiers, as_integer);
         }
 
         protected AchievementWithCompletitionTieredDefinition() : base() { this.max_completition_tiers = new List<float>{ 0, 1 }; this.as_integer = true; }
