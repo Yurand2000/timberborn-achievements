@@ -5,22 +5,14 @@ using Timberborn.SingletonSystem;
 
 namespace Yurand.Timberborn.Achievements.ExampleAchievement
 {
-    public class GameLogic : ILoadableSingleton
+    public class GameLogic : AchievementLogicBase
     {
-        private EventBus eventBus;
-        private IConsoleWriter console;
-        private AchievementManager manager;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager) {
-            this.eventBus = eventBus;
-            this.console = console;
-            this.manager = manager;
-        }
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager)
+            : base(eventBus, console, manager) {}
 
-        public void Load() {            
-            eventBus.Register(this);            
-            if (PluginEntryPoint.debugLogging) {
-                console.LogInfo("ExampleAchievement logic loaded.");
-            }
+        protected override void OnLoad() {
+            debug_console.LogInfo("ExampleAchievement logic loaded.");
+            SetAchievementCompleted();
         }
 
         public const string exampleAchievementId = "a000.example";

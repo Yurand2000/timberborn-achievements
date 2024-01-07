@@ -7,33 +7,31 @@ using Timberborn.SingletonSystem;
 
 namespace Yurand.Timberborn.Achievements.Holydays
 {
-    public class GameLogic : ILoadableSingleton
+    public class GameLogic : AchievementLogicBase
     {
-        private IConsoleWriter console;
-        private AchievementManager manager;
-        public GameLogic(IConsoleWriter console, AchievementManager manager) {
-            this.console = console;
-            this.manager = manager;
-        }
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager)
+            : base(eventBus, console, manager) { }
 
-        public void Load() {
+        protected override void OnLoad() {
             var today = System.DateTime.Now;
             if (today.Day == 31 && today.Month == 10) {
                 manager.UpdateLocalAchievement(halloweenId, new AchievementHidden.Updater{ completed = true });
-                if (PluginEntryPoint.debugLogging) console.LogInfo($"Completed Achievement {halloweenId}");
+                debug_console.LogInfo($"Completed Achievement {halloweenId}");
             }
             else if (today.Day == 1 && today.Month == 11) {
                 manager.UpdateLocalAchievement(dayOfTheDeadId, new AchievementHidden.Updater{ completed = true });
-                if (PluginEntryPoint.debugLogging) console.LogInfo($"Completed Achievement {dayOfTheDeadId}");
+                debug_console.LogInfo($"Completed Achievement {dayOfTheDeadId}");
             }
             else if (today.Day == 25 && today.Month == 12) {
                 manager.UpdateLocalAchievement(christmasId, new AchievementHidden.Updater{ completed = true });
-                if (PluginEntryPoint.debugLogging) console.LogInfo($"Completed Achievement {christmasId}");
+                debug_console.LogInfo($"Completed Achievement {christmasId}");
             }
             else if (today.Day == 6 && today.Month == 1) {
                 manager.UpdateLocalAchievement(epiphanyId, new AchievementHidden.Updater{ completed = true });
-                if (PluginEntryPoint.debugLogging) console.LogInfo($"Completed Achievement {epiphanyId}");
+                debug_console.LogInfo($"Completed Achievement {epiphanyId}");
             }
+
+            SetAchievementCompleted();
         }
 
         public const string halloweenId = "a058.0.holydays.halloween";

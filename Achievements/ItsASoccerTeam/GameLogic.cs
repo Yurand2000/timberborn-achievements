@@ -7,22 +7,11 @@ using Timberborn.SingletonSystem;
 
 namespace Yurand.Timberborn.Achievements.ItsASoccerTeam
 {
-    public class GameLogic : ILoadableSingleton
+    public class GameLogic : AchievementLogicBase
     {
-        private EventBus eventBus;
-        private IConsoleWriter console;
-        private AchievementManager manager;
-        private int current_children;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager) {
-            this.eventBus = eventBus;
-            this.console = console;
-            this.manager = manager;
-            this.current_children = 0;
-        }
-
-        public void Load() {
-            eventBus.Register(this);
-        }
+        private int current_children = 0;
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager)
+            : base(eventBus, console, manager) { }
 
         [OnEvent]
         public void OnCharacterCreated(CharacterCreatedEvent characterCreatedEvent)
@@ -33,11 +22,9 @@ namespace Yurand.Timberborn.Achievements.ItsASoccerTeam
 
                 if (current_children >= 11) {
                     manager.UpdateLocalAchievement(itsASoccerTeamId, new AchievementHidden.Updater{ completed = true });
-                    eventBus.Unregister(this);
+                    SetAchievementCompleted();
 
-                    if (PluginEntryPoint.debugLogging) {
-                        console.LogInfo("Completed itsASoccerTeam achievement.");
-                    }
+                    debug_console.LogInfo("Completed itsASoccerTeam achievement.");
                 }
             }
         }

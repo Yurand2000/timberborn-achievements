@@ -9,40 +9,31 @@ using Timberborn.Characters;
 namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
 {
     [HarmonyPatch]
-    public class GameLogic : ILoadableSingleton, ISaveableSingleton
+    public class GameLogic : SaveableAchievementLogicBase
     {
-        private EventBus eventBus;
-        private IConsoleWriter console;
-        private AchievementManager manager;
-        private ISingletonLoader singletonLoader;
-        private int max_beavers;
-        private int current_beavers;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, ISingletonLoader singletonLoader) {
-            this.eventBus = eventBus;
-            this.console = console;
-            this.manager = manager;
-            this.singletonLoader = singletonLoader;
-            this.max_beavers = 0;
-            this.current_beavers = 0;
-        }
+        private int local_max_beavers = 0;
+        private int current_beavers = 0;
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, ISingletonLoader singletonLoader)
+            : base(eventBus, console, manager, singletonLoader) { }
 
-        public void Load() {
-            eventBus.Register(this);
-
-            if (singletonLoader.HasSingleton(singletonKey)) {
-                var loader = singletonLoader.GetSingleton(singletonKey);
-                if (loader.Has(propertyMaxBeavers))
-                    max_beavers = loader.Get(propertyMaxBeavers);
-            } else {
-                max_beavers = 0;
-            }
+        protected override void OnLoad() {
+            base.OnLoad();
             UpdateBeaverCounters();
         }
 
-        public void Save(ISingletonSaver singletonSaver)
-        {
-            var saver = singletonSaver.GetSingleton(singletonKey);
-            saver.Set(propertyMaxBeavers, max_beavers);
+        protected override void NoSingletonLoad() {
+            local_max_beavers = 0;
+        }
+
+        protected override void SingletonLoad(IObjectLoader loader) {
+            if (loader.Has(propertyMaxBeavers))
+                local_max_beavers = loader.Get(propertyMaxBeavers);
+            else
+                local_max_beavers = 0;
+        }
+
+        protected override void SingletonSave(IObjectSaver saver) {
+            saver.Set(propertyMaxBeavers, local_max_beavers);
         }
 
         [OnEvent]
@@ -51,8 +42,8 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
             Beaver componentFast = characterCreatedEvent.Character.GetComponentFast<Beaver>();
             if ((object)componentFast != null) {
                 current_beavers += 1;
-                if (current_beavers > max_beavers) {
-                    max_beavers = current_beavers;
+                if (current_beavers > local_max_beavers) {
+                    local_max_beavers = current_beavers;
                     UpdateBeaverCounters();
                 }
             }
@@ -68,7 +59,7 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
         }
 
         private void UpdateBeaverCounters() {
-            var updater = new AchievementWithCompletition.Updater(){ next_state = max_beavers };
+            var updater = new AchievementWithCompletition.Updater(){ next_state = local_max_beavers };
 
             //manager.UpdateLocalAchievement(beaverPopulation50Id, updater);
             manager.UpdateLocalAchievement(beaverPopulation100Id, updater);
@@ -77,9 +68,10 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
             manager.UpdateLocalAchievement(beaverPopulation500Id, updater);
             manager.UpdateLocalAchievement(beaverPopulation999Id, updater);
 
-            if (PluginEntryPoint.debugLogging) {
-                console.LogInfo("Updated beaverPopulationX achievements.");
-            }
+            if (local_max_beavers >= 999)
+                SetAchievementCompleted();
+
+            debug_console.LogInfo("Updated beaverPopulationX achievements.");
         }
 
         //public const string beaverPopulation50Id = "a002.-1.beaverPopulation50";
@@ -88,7 +80,6 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
         public const string beaverPopulation300Id = "a002.2.beaverPopulation300";
         public const string beaverPopulation500Id = "a002.3.beaverPopulation500";
         public const string beaverPopulation999Id = "a002.4.beaverPopulation999";
-        private readonly SingletonKey singletonKey = new SingletonKey(typeof(GameLogic).FullName);
         private readonly PropertyKey<int> propertyMaxBeavers = new PropertyKey<int>("max_beavers");
     }
     public class Generator : IAchievementGenerator

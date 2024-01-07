@@ -8,21 +8,16 @@ using Timberborn.WeatherSystem;
 
 namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
 {
-    public class GameLogic : ILoadableSingleton
+    public class GameLogic : AchievementLogicBase
     {
-        private EventBus eventBus;
-        private IConsoleWriter console;
-        private AchievementManager manager;
         private WeatherService weatherService;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, WeatherService weatherService) {
-            this.eventBus = eventBus;
-            this.console = console;
-            this.manager = manager;
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager, WeatherService weatherService)
+            : base(eventBus, console, manager)
+        {
             this.weatherService = weatherService;
         }
 
-        public void Load() {
-            eventBus.Register(this);            
+        protected override void OnLoad() {
             OnNewDayEvent(null);
         }
 
@@ -39,9 +34,10 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
             manager.UpdateLocalAchievement(buildColony50Id, updater);
             manager.UpdateLocalAchievement(buildColony100Id, updater);
 
-            if (PluginEntryPoint.debugLogging) {
-                console.LogInfo("Updated buildColonyX achievements.");
-            }
+            if (current_cycle >= 100)
+                SetAchievementCompleted();
+
+            debug_console.LogInfo("Updated buildColonyX achievements.");
         }
 
         public const string buildColony5Id = "a001.0.buildColony5";
