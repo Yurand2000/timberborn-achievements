@@ -42,15 +42,40 @@ namespace Yurand.Timberborn.Achievements.Holydays
         public const string epiphanyId = "a058.3.holydays.epiphany";
     }
 
-    [HarmonyPatch]
-    public class Patcher {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
-            __result.Add(new AchievementHiddenDefinition(GameLogic.halloweenId, halloweenImage, halloweenTitle, halloweenDescription));
-            __result.Add(new AchievementHiddenDefinition(GameLogic.dayOfTheDeadId, dayOfTheDeadImage, dayOfTheDeadTitle, dayOfTheDeadDescription));
-            __result.Add(new AchievementHiddenDefinition(GameLogic.christmasId, christmasImage, christmasTitle, christmasDescription));
-            __result.Add(new AchievementHiddenDefinition(GameLogic.epiphanyId, epiphanyImage, epiphanyTitle, epiphanyDescription));
+    public class Generator : IAchievementGenerator
+    {
+        public IEnumerable<AchievementDefinitionBase> Generate()
+        {
+            var definitions = new List<AchievementDefinitionBase>();
+            definitions.Add(new AchievementHiddenDefinition(
+                GameLogic.halloweenId,
+                halloweenImage,
+                halloweenTitle,
+                halloweenDescription
+            ));
+
+            definitions.Add(new AchievementHiddenDefinition(
+                GameLogic.dayOfTheDeadId,
+                dayOfTheDeadImage,
+                dayOfTheDeadTitle,
+                dayOfTheDeadDescription
+            ));
+
+            definitions.Add(new AchievementHiddenDefinition(
+                GameLogic.christmasId,
+                christmasImage,
+                christmasTitle,
+                christmasDescription
+            ));
+
+            definitions.Add(new AchievementHiddenDefinition(
+                GameLogic.epiphanyId,
+                epiphanyImage,
+                epiphanyTitle,
+                epiphanyDescription
+            ));
+        
+            return definitions;
         }
         private const string halloweenTitle = "yurand.achievements.a058.0.holydays.halloween.title";
         private const string halloweenDescription = "yurand.achievements.a058.0.holydays.halloween.description";

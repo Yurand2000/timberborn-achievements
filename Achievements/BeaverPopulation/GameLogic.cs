@@ -91,19 +91,56 @@ namespace Yurand.Timberborn.Achievements.BeaverPopulationAchievement
         private readonly SingletonKey singletonKey = new SingletonKey(typeof(GameLogic).FullName);
         private readonly PropertyKey<int> propertyMaxBeavers = new PropertyKey<int>("max_beavers");
     }
+    public class Generator : IAchievementGenerator
+    {
+        public IEnumerable<AchievementDefinitionBase> Generate()
+        {
+            var definitions = new List<AchievementDefinitionBase>();
+            // definitions.Add(new AchievementWithCompletitionDefinition(
+            //     GameLogic.beaverPopulation50Id,
+            //     beaverPopulation50Image,
+            //     beaverPopulation50Title,
+            //     beaverPopulation50Description,
+            //     50, true));
+            
+            definitions.Add(new AchievementWithCompletitionDefinition(
+                GameLogic.beaverPopulation100Id,
+                beaverPopulation100Image,
+                beaverPopulation100Title,
+                 beaverPopulation100Description,
+                 100, true));
 
-    [HarmonyPatch]
-    public class Patcher {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
-            //__result.Add(new AchievementWithCompletitionDefinition(GameLogic.beaverPopulation50Id, beaverPopulation50Image, beaverPopulation50Title, beaverPopulation50Description, 50, true));
-            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.beaverPopulation100Id, beaverPopulation100Image, beaverPopulation100Title, beaverPopulation100Description, 100, true));
-            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.beaverPopulation200Id, beaverPopulation200Image, beaverPopulation200Title, beaverPopulation200Description, 200, true));
-            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.beaverPopulation300Id, beaverPopulation300Image, beaverPopulation300Title, beaverPopulation300Description, 300, true));
-            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.beaverPopulation500Id, beaverPopulation500Image, beaverPopulation500Title, beaverPopulation500Description, 500, true));
-            __result.Add(new AchievementWithCompletitionDefinition(GameLogic.beaverPopulation999Id, beaverPopulation999Image, beaverPopulation999Title, beaverPopulation999Description, 999, true));
+            definitions.Add(new AchievementWithCompletitionDefinition(
+                GameLogic.beaverPopulation200Id,
+                beaverPopulation200Image,
+                beaverPopulation200Title,
+                beaverPopulation200Description,
+                200, true));
+
+            definitions.Add(new AchievementWithCompletitionDefinition(
+                GameLogic.beaverPopulation300Id,
+                beaverPopulation300Image,
+                beaverPopulation300Title,
+                beaverPopulation300Description,
+                300, true));
+
+            definitions.Add(new AchievementWithCompletitionDefinition(
+                GameLogic.beaverPopulation500Id,
+                beaverPopulation500Image,
+                beaverPopulation500Title,
+                beaverPopulation500Description,
+                500, true));
+
+            definitions.Add(new AchievementWithCompletitionDefinition(
+                GameLogic.beaverPopulation999Id,
+                beaverPopulation999Image,
+                beaverPopulation999Title,
+                beaverPopulation999Description,
+                999, true));
+        
+            return definitions;
         }
+        
         
         //private const string beaverPopulation50Title = "yurand.achievements.a002.-1.beaverPopulation50.title";
         //private const string beaverPopulation50Description = "yurand.achievements.a002.-1.beaverPopulation50.description";

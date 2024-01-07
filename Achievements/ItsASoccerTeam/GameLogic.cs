@@ -54,12 +54,18 @@ namespace Yurand.Timberborn.Achievements.ItsASoccerTeam
         public const string itsASoccerTeamId = "a049.itsASoccerTeam";
     }
 
-    [HarmonyPatch]
-    public class Patcher {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
-            __result.Add(new AchievementHiddenDefinition(GameLogic.itsASoccerTeamId, itsASoccerTeamImage, itsASoccerTeamTitle, itsASoccerTeamDescription));
+    public class Generator : IAchievementGenerator
+    {
+        public IEnumerable<AchievementDefinitionBase> Generate()
+        {
+            var definition = new AchievementHiddenDefinition(
+                GameLogic.itsASoccerTeamId,
+                itsASoccerTeamImage,
+                itsASoccerTeamTitle,
+                itsASoccerTeamDescription
+            );        
+        
+            yield return definition;
         }
         private const string itsASoccerTeamTitle = "yurand.achievements.a049.itsASoccerTeam.title";
         private const string itsASoccerTeamDescription = "yurand.achievements.a049.itsASoccerTeam.description";

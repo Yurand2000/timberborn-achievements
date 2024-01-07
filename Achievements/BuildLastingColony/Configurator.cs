@@ -12,4 +12,13 @@ namespace Yurand.Timberborn.Achievements.BuildLastingColonyAchievement
             containerDefinition.Bind<GameLogic>().AsSingleton();
         }
     }
+    
+    [Configurator(SceneEntrypoint.All)]
+    public class DefinitionConfigurator : IConfigurator
+    {
+        public void Configure(IContainerDefinition containerDefinition)
+        {
+            containerDefinition.MultiBind<IAchievementGenerator>().To<Generator>().AsSingleton();
+        }
+    }
 }

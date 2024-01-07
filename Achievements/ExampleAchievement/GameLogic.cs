@@ -22,16 +22,29 @@ namespace Yurand.Timberborn.Achievements.ExampleAchievement
                 console.LogInfo("ExampleAchievement logic loaded.");
             }
         }
+
+        public const string exampleAchievementId = "a000.example";
     }
 
-    [HarmonyPatch]
-    public class Patcher {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
+    public class Generator : IAchievementGenerator
+    {
+        public IEnumerable<AchievementDefinitionBase> Generate()
+        {
+            var definition = new AchievementHiddenDefinition(
+                GameLogic.exampleAchievementId,
+                exampleAchievementTitle,
+                exampleAchievementDescription,
+                exampleAchievementImage
+            );
+
             if (PluginEntryPoint.debugLogging) {
                 PluginEntryPoint.console.LogInfo("ExampleAchievement definition loaded.");
             }
+        
+            yield return definition;
         }
+        private const string exampleAchievementTitle = "a000.example.title";
+        private const string exampleAchievementDescription = "a000.example.description";
+        private const string exampleAchievementImage = "a000.example.image";
     }
 }

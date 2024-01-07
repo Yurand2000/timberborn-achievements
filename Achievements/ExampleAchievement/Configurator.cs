@@ -13,4 +13,14 @@ namespace Yurand.Timberborn.Achievements.ExampleAchievement
                 containerDefinition.Bind<GameLogic>().AsSingleton();
         }
     }
+    
+    [Configurator(SceneEntrypoint.All)]
+    public class DefinitionConfigurator : IConfigurator
+    {
+        public void Configure(IContainerDefinition containerDefinition)
+        {
+            if (AchievementManager.loadTestAchievements)
+                containerDefinition.MultiBind<IAchievementGenerator>().To<Generator>().AsSingleton();
+        }
+    }
 }

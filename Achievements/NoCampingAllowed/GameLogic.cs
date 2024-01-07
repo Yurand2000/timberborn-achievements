@@ -12,21 +12,11 @@ using Timberborn.SingletonSystem;
 
 namespace Yurand.Timberborn.Achievements.NoCampingAllowed
 {
-    public class GameLogic : ILoadableSingleton
+    public class GameLogic : AchievementLogicBase
     {
-        private EventBus eventBus;
-        private IConsoleWriter console;
-        private AchievementManager manager;
         private int current_campfires = 0;
-        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager) {
-            this.eventBus = eventBus;
-            this.console = console;
-            this.manager = manager;
-        }
-
-        public void Load() {
-            eventBus.Register(this);
-        }
+        public GameLogic(EventBus eventBus, IConsoleWriter console, AchievementManager manager)
+            : base(eventBus, console, manager) { }
         
         [OnEvent]
         public void OnCampfireBuilt(ConstructibleEnteredFinishedStateEvent constructibleEvent) {
@@ -36,11 +26,8 @@ namespace Yurand.Timberborn.Achievements.NoCampingAllowed
 
             if (current_campfires >= 3) {
                 manager.UpdateLocalAchievement(noCampingAllowedId, new AchievementSimple.Updater{ completed = true });
-                eventBus.Unregister(this);
-
-                if (PluginEntryPoint.debugLogging) {
-                    console.LogInfo($"Completed noCampingAllowed achievement");
-                }
+                SetAchievementCompleted();
+                debug_console.LogInfo($"Completed noCampingAllowed achievement");
             }
         }
         
@@ -64,13 +51,20 @@ namespace Yurand.Timberborn.Achievements.NoCampingAllowed
         public const string noCampingAllowedId = "a010.noCampingAllowed";
     }
 
-    [HarmonyPatch]
-    public class Patcher {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(AchievementManager), "LoadDefinitions")]
-        public static void PatchLoadAchievementsDefinitions(ref List<AchievementDefinitionBase> __result) {
-            __result.Add(new AchievementSimpleDefinition(GameLogic.noCampingAllowedId, noCampingAllowedIdImage, noCampingAllowedIdTitle, noCampingAllowedIdDescription));
+    public class Generator : IAchievementGenerator
+    {
+        public IEnumerable<AchievementDefinitionBase> Generate()
+        {
+            var definition = new AchievementSimpleDefinition(
+                GameLogic.noCampingAllowedId,
+                noCampingAllowedIdImage,
+                noCampingAllowedIdTitle,
+                noCampingAllowedIdDescription
+            );
+        
+            yield return definition;
         }
+
         private const string noCampingAllowedIdTitle = "yurand.achievements.a010.noCampingAllowed.title";
         private const string noCampingAllowedIdDescription = "yurand.achievements.a010.noCampingAllowed.description";
         private const string noCampingAllowedIdImage = "yurand.achievements.a010.noCampingAllowed.image";

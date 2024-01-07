@@ -43,7 +43,6 @@ namespace Yurand.Timberborn.Achievements
                 AddAchievementDefinitions(definitionGenerator.Generate());
             }
 
-            AddAchievementDefinitions(LoadDefinitions());
             if (loadTestAchievements)
                 AddAchievementDefinitions(LoadDebugDefinitions());
 
@@ -51,13 +50,10 @@ namespace Yurand.Timberborn.Achievements
 
             if (PluginEntryPoint.debugLogging) {
                 console.LogInfo("Correctly loaded achievements manager.");
-                console.LogInfo($"Loaded {achievementDefinitions.Count} achievements");
                 TestAchievementTypeConsistency();
             }
-        }
 
-        private List<AchievementDefinitionBase> LoadDefinitions() {
-            return new List<AchievementDefinitionBase>();
+            console.LogInfo($"Loaded {achievementDefinitions.Count} achievements");
         }
 
         private void LoadGlobal() {
