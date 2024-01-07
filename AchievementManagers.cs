@@ -25,14 +25,24 @@ namespace Yurand.Timberborn.Achievements
         private Dictionary<string, AchievementDefinitionBase> achievementDefinitions = new Dictionary<string, AchievementDefinitionBase>();
         private Dictionary<string, AchievementBase> global_achievements = new Dictionary<string, AchievementBase>();
         private Dictionary<string, AchievementBase> local_achievements = null;
+        private IEnumerable<IAchievementGenerator> definitionGenerators;
         private bool isInGame = false;
 
-        public AchievementManager(IConsoleWriter console, EventBus eventBus) {
+        public AchievementManager(
+            IConsoleWriter console,
+            EventBus eventBus,
+            IEnumerable<IAchievementGenerator> achievementGenerators
+        ) {
             this.console = console;
             this.eventBus = eventBus;
+            this.definitionGenerators = achievementGenerators;
         }
 
         public void Load() {
+            foreach (var definitionGenerator in definitionGenerators) {
+                AddAchievementDefinitions(definitionGenerator.Generate());
+            }
+
             AddAchievementDefinitions(LoadDefinitions());
             if (loadTestAchievements)
                 AddAchievementDefinitions(LoadDebugDefinitions());
@@ -149,6 +159,10 @@ namespace Yurand.Timberborn.Achievements
             } else {
                 return null;
             }
+        }
+
+        public bool IsAchievementCompleted(string achievementId) {
+            return GetGlobalAchievement(achievementId).completed;
         }
 
         private void CreateAchievementIfEmptyInDictionary(string achievementId, IDictionary<string, AchievementBase> dictionary) {
