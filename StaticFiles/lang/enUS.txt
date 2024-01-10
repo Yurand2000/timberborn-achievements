@@ -61,6 +61,18 @@ yurand.achievements.a002.4.beaverPopulation999.title,Timberopolis,
 yurand.achievements.a002.4.beaverPopulation999.description,Reach a population of at least 999 living beavers. Bots do not count towards this goal.,
 yurand.achievements.a002.4.beaverPopulation999.image,Assets/Resources/A002.4.png,
 
+yurand.achievements.a005.0.dam.title,Dam!,
+yurand.achievements.a005.0.dam.description,Build a dam that has at least 20 levee blocks,
+yurand.achievements.a005.0.dam.image,Assets/Resources/A005.png
+
+yurand.achievements.a005.1.realCivilEngineer.title,Real Civil Engineer,
+yurand.achievements.a005.1.realCivilEngineer.description,Build a dam that has at least 40 levee blocks,
+yurand.achievements.a005.1.realCivilEngineer.image,Assets/Resources/A005.1.png,
+
+yurand.achievements.a005.2.bridgeReview.title,Bridge Review 9.2/10,
+yurand.achievements.a005.2.bridgeReview.description,Build a 4x1 bridge,
+yurand.achievements.a005.2.bridgeReview.image,Assets/Resources/A005.2.png,
+
 yurand.achievements.a010.noCampingAllowed.title,No loitering!,
 yurand.achievements.a010.noCampingAllowed.description,Build 3 campfires,
 yurand.achievements.a010.noCampingAllowed.image,Assets/Resources/A010.png,
